@@ -33,6 +33,18 @@
     transform: translateY(-4px) rotate(0)
 }
 
+.gad button[aria-disabled=true] {
+    opacity: .6;
+    cursor: not-allowed
+}
+
+.gad button .why {
+    display: block;
+    margin-top: 8px;
+    color: #b3321c;
+    font-weight: 700
+}
+
 .gad button[aria-pressed=true] {
     background: var(--mint);
     animation: pop .5s both

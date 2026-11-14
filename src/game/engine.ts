@@ -48,6 +48,15 @@ export function plan(s: GameState, a: ActionId): Plan {
 }
 
 /**
+ * Can action `a` be chosen right now? Uses exactly the same rules as step() and changes nothing.
+ * A shift on which the base cannot cover its upkeep still counts as allowed (the mission then ends), just like step().
+ */
+export function check(s: GameState, a: ActionId): { ok: true } | { ok: false; error: string } {
+  const r = step(s, a);
+  return r.ok ? { ok: true } : { ok: false, error: r.error };
+}
+
+/**
  * Pure: preview and resolution both use this.
  * Order: base power first, then the job, then harvest, then crew uses supplies, then the storm check.
  */

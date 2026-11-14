@@ -21,7 +21,9 @@ describe('screen flow', () => {
     expect(uiReducer(u, { type: 'up', k: 'lab' }).sel).toEqual(['walls']);
   });
   it('choosing an event clears earlier gadget picks', () => {
-    const u = run([{ type: 'ev', k: 1 }], ready());
+    // Issue #3: events can only be chosen on the event screen, so go back there from gadget picking first.
+    const picked = run([{ type: 'go-brief' }, { type: 'go-event' }, { type: 'ev', k: 0 }, { type: 'up', k: 'walls' }, { type: 'up', k: 'garden' }]);
+    const u = run([{ type: 'go-event' }, { type: 'ev', k: 1 }], picked);
     expect([u.sel, u.screen, u.sc]).toEqual([[], 'prep', 1]);
   });
 });

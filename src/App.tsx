@@ -40,7 +40,7 @@ export default function App() {
     case 'launch': screen = <Welcome onStart={() => dispatch({ type: 'go-brief' })} />; break;
     case 'brief': screen = <Briefing onNext={() => dispatch({ type: 'go-event' })} />; break;
     case 'event': screen = <EventSelection onPick={k => dispatch({ type: 'ev', k })} />; break;
-    case 'prep': screen = <GadgetSelection sc={ui.sc} sel={ui.sel}
+    case 'prep': screen = <GadgetSelection sc={ui.sc} sel={ui.sel} message={ui.mentor}
       onToggle={k => dispatch({ type: 'up', k })} onLaunch={() => dispatch({ type: 'launch' })} onChangeEvent={() => dispatch({ type: 'go-event' })} />; break;
     case 'mission': if (s) screen = <Mission s={s} pending={ui.pending} resolving={ui.resolving} mentor={ui.mentor} prev={ui.prev} tx={ui.tx}
       onPick={k => dispatch({ type: 'pick', k })} onConfirm={confirm} onCancel={() => dispatch({ type: 'cancel' })}

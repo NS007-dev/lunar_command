@@ -1,22 +1,26 @@
 import { ACT } from '../data/scienceFacts';
-import { plan, step } from '../game/engine';
-import { kidErr } from '../game/mentor';
+import { check, plan } from '../game/engine';
+import { reason } from '../game/mentor';
 import type { ActionId } from '../game/scenarios';
 import type { GameState } from '../game/types';
 import { Icon } from './Icon';
 
-/** One of the six shift jobs. Disabled (with the reason) when it can't be done right now. */
+/**
+ * One of the six shift jobs. When it can't be done right now it shows the reason and is marked
+ * aria-disabled (not `disabled`), so keyboard and screen-reader users can still reach it and hear why.
+ * Pressing it anyway makes Pip explain; the reducer refuses it, so it never reaches "Do it!".
+ */
 export function ActionButton({ s, a, pressed, resolving, onPick }: {
   s: GameState; a: ActionId; pressed: boolean; resolving: boolean; onPick: (a: ActionId) => void;
 }) {
-  const pl = plan(s, a), r = step(s, a), [title, desc, icon] = ACT[a];
+  const pl = plan(s, a), r = check(s, a), [title, desc, icon] = ACT[a];
   return (
-    <button className="act" aria-pressed={pressed} disabled={!(r.ok && !resolving)} onClick={() => onPick(a)}>
+    <button className="act" aria-pressed={pressed} aria-disabled={r.ok ? undefined : true} disabled={resolving} onClick={() => onPick(a)}>
       <Icon name={icon} />
       <span>
         <h3>{title}</h3>
         <small>{desc}</small>
-        {!r.ok && <small className="why">{kidErr(r.error)}</small>}
+        {!r.ok && <small className="why">{reason(r.error, s)}</small>}
       </span>
       <span className="c">{pl.error ? '' : '−' + pl.cost}<small><br />power</small></span>
     </button>
