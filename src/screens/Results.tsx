@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { Confetti } from '../components/Confetti';
 import { HistoryBars } from '../components/HistoryBars';
 import { PipSays, type PipMood } from '../components/Pip';
@@ -6,9 +7,21 @@ import { EVT } from '../data/scienceFacts';
 import { failure } from '../game/mentor';
 import { K, SC, UP } from '../game/scenarios';
 import type { GameState, Outcome } from '../game/types';
+import { RESTART_ASK } from '../game/uiState';
 
 /** Mission debrief: outcome, score breakdown, charts and what we learned. */
-export function Results({ s, onReplay, onOtherEvent }: { s: GameState; onReplay: () => void; onOtherEvent: () => void }) {
+export function Results({ s, asking = false, onRestart, onRestartYes, onRestartNo, onOtherEvent }: {
+  s: GameState;
+  /** Pip is asking whether to restart */
+  asking?: boolean;
+  onRestart: () => void; onRestartYes: () => void; onRestartNo: () => void; onOtherEvent: () => void;
+}) {
+  // After "No, go back", put keyboard focus back on "Restart mission" so keyboard users keep their place.
+  const restartBtn = useRef<HTMLButtonElement>(null), wasAsking = useRef(asking);
+  useEffect(() => {
+    if (wasAsking.current && !asking) restartBtn.current?.focus();
+    wasAsking.current = asking;
+  }, [asking]);
   const o = s.outcome as Outcome, sco = s.score!, e = SC[s.sc], ex = s.exposure;
   // Why a critical mission stopped: power or supplies, with the real numbers from the last shift.
   const lastShift = s.history[s.history.length - 1], f = o === 'critical' && lastShift && !lastShift.safe ? failure(lastShift) : null;
@@ -61,10 +74,21 @@ export function Results({ s, onReplay, onOtherEvent }: { s: GameState; onReplay:
         </div>
       </div>
       <div style={{ marginTop: 20 }}><Sources /></div>
-      <p style={{ marginTop: 26 }}>
-        <button className="btn" onClick={onReplay}>Play again! <span aria-hidden="true">▶</span></button>{'   '}
-        <button className="btn w" onClick={onOtherEvent}>Try another Sun event</button>
-      </p>
+      {asking ? (
+        <div className="pop" role="group" aria-labelledby="restart-q" style={{ marginTop: 26 }}>
+          <PipSays mood="worried" tone="warn" style={{ maxWidth: 720 }}><span id="restart-q">{RESTART_ASK}</span></PipSays>
+          <p style={{ marginTop: 18 }}>
+            <button className="btn g" onClick={onRestartYes}>Yes, restart!</button>{'   '}
+            {/* The safe choice gets focus first. */}
+            <button className="btn w" onClick={onRestartNo} autoFocus>No, go back</button>
+          </p>
+        </div>
+      ) : (
+        <p style={{ marginTop: 26 }}>
+          <button className="btn" ref={restartBtn} onClick={onRestart}>Restart mission <span aria-hidden="true">↻</span></button>{'   '}
+          <button className="btn w" onClick={onOtherEvent}>Try another Sun event</button>
+        </p>
+      )}
     </section>
   );
 }
