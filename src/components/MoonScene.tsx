@@ -30,8 +30,9 @@ const PANELS = [0, 1, 2].map(i => (
 /**
  * The cartoon Moon outpost. Its look is driven by the real game state (walls, garden, dish, storm).
  * `full` adds the "RADIATION STORM!" banner (used in the mission window, not the background).
+ * `newFrom`: shelter blocks from this index on were just built, so they fade in (CSS, so reduced motion turns it off).
  */
-export function MoonScene({ s, full }: { s: GameState | null; full: boolean }) {
+export function MoonScene({ s, full, newFrom }: { s: GameState | null; full: boolean; newFrom?: number }) {
   const sc = s ? SC[s.sc] : null;
   const storm = !!(s && sc && !s.ended && inStorm(sc, s.turn));
   const shade = !!(s && sc && !s.ended && sunAt(sc, s.turn) < K.sun);
@@ -40,9 +41,8 @@ export function MoonScene({ s, full }: { s: GameState | null; full: boolean }) {
   if (s) for (let i = 0; i < s.shield; i++) {
     const c = i % 2, rw = (i / 2) | 0;
     blocks.push(
-      <rect key={i} x={738 + c * 48} y={568 - rw * 32} width="46" height="30" rx="5" fill={rw % 2 ? '#e0dac6' : '#c9c3b0'} stroke={INK} strokeWidth="4">
-        <animate attributeName="opacity" from="0" to="1" dur=".6s" />
-      </rect>,
+      <rect key={i} x={738 + c * 48} y={568 - rw * 32} width="46" height="30" rx="5" fill={rw % 2 ? '#e0dac6' : '#c9c3b0'} stroke={INK} strokeWidth="4"
+        className={newFrom != null && i >= newFrom ? 'nb' : undefined} />,
     );
   }
 

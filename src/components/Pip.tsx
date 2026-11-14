@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
+import type { Tone } from '../game/mentor';
 import { O } from './outline';
 
 export type PipMood = 'happy' | 'worried' | 'cheer';
@@ -32,14 +33,17 @@ export function Pip({ mood }: { mood: PipMood }) {
   );
 }
 
-/** Pip plus a speech bubble. */
-export function PipSays({ mood, children, className, style, live }: {
-  mood: PipMood; children: ReactNode; className?: string; style?: CSSProperties; live?: boolean;
+/**
+ * Pip plus a speech bubble. `tone` tints the bubble for good news, warnings and failures
+ * (the words always say it too, so colour is never the only clue).
+ */
+export function PipSays({ mood, children, className, style, live, tone }: {
+  mood: PipMood; children: ReactNode; className?: string; style?: CSSProperties; live?: boolean; tone?: Tone;
 }) {
   return (
     <div className={['talk', className].filter(Boolean).join(' ')} style={style}>
       <Pip mood={mood} />
-      <p className="say" style={{ margin: 0 }} aria-live={live ? 'polite' : undefined}>{children}</p>
+      <div className={['say', tone].filter(Boolean).join(' ')} aria-live={live ? 'polite' : undefined}>{children}</div>
     </div>
   );
 }

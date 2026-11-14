@@ -43,6 +43,7 @@ export default function App() {
     case 'prep': screen = <GadgetSelection sc={ui.sc} sel={ui.sel} message={ui.mentor}
       onToggle={k => dispatch({ type: 'up', k })} onLaunch={() => dispatch({ type: 'launch' })} onChangeEvent={() => dispatch({ type: 'go-event' })} />; break;
     case 'mission': if (s) screen = <Mission s={s} pending={ui.pending} resolving={ui.resolving} mentor={ui.mentor} prev={ui.prev} tx={ui.tx}
+      report={ui.report} showReport={ui.showReport} refused={ui.refused} onResults={() => dispatch({ type: 'results' })}
       onPick={k => dispatch({ type: 'pick', k })} onConfirm={confirm} onCancel={() => dispatch({ type: 'cancel' })}
       onHint={() => dispatch({ type: 'hint' })} onExplain={() => dispatch({ type: 'expl' })} onAsk={k => dispatch({ type: 'sq', k })} />; break;
     case 'debrief': if (s) screen = <Results s={s} onReplay={() => dispatch({ type: 'replay' })} onOtherEvent={() => dispatch({ type: 'go-event' })} />; break;
@@ -54,5 +55,8 @@ export default function App() {
     <div id="bg" aria-hidden="true" key={`bg${ui.renderId}`}><MoonScene s={s && ui.screen === 'mission' ? s : null} full={false} /></div>
     <div id="scrim" style={{ opacity: SCRIM[ui.screen] }}></div>
     <main id="app" ref={mainRef}><Fragment key={ui.renderId}>{screen}</Fragment></main>
+    {/* Stays on the page while the screen above is redrawn, so screen readers reliably hear shift results,
+        storm news, previews and refusals. The key makes repeated words count as new. */}
+    <div className="sr-only" role="status" aria-live="polite" aria-atomic="true"><span key={ui.announceN}>{ui.announce}</span></div>
   </>;
 }

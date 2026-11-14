@@ -11,14 +11,18 @@ export interface Preview {
   sci: number;
 }
 
-/** Segment bar for supplies and shelter. Dashed segments show what a previewed action would lose (gl) or gain (gb). */
-function Segments({ cur, tot, pr, cls, low }: { cur: number; tot: number; pr?: number; cls?: string; low?: number }) {
+/**
+ * Segment bar for supplies and shelter. Dashed segments show what a previewed action would lose (gl) or gain (gb).
+ * `was` is the value before the shift that just played: new segments pop in (chg) and used ones fade out (gone).
+ */
+function Segments({ cur, tot, pr, cls, low, was }: { cur: number; tot: number; pr?: number; cls?: string; low?: number; was?: number }) {
   const c: ReactNode[] = [];
   for (let i = 0; i < tot; i++) {
     let k = '';
     if (pr != null && pr < cur && i >= pr && i < cur) k = 'gl';
     else if (pr != null && pr > cur && i >= cur && i < pr) k = 'gb';
-    else if (i < cur) k = low && cur <= low ? 'lo' : 'on';
+    else if (i < cur) { k = low && cur <= low ? 'lo' : 'on'; if (was != null && i >= was) k += ' chg'; }
+    else if (was != null && i < was) k = 'gone';
     c.push(<i key={i} className={k}></i>);
   }
   return <div className={`sg ${cls || ''}`} aria-hidden="true">{c}</div>;
@@ -44,22 +48,25 @@ const Arrow = ({ a, b }: { a: number; b?: number }) => (b != null && b !== a ? <
 /** The four resource panels: power, crew supplies, crew protection, science stars. */
 export function ResourceDisplay({ s, preview, prev, tx }: { s: GameState; preview: Preview | null; prev: number | null; tx: boolean }) {
   const sc = SC[s.sc], pr: Partial<Preview> = preview || {}, sun = sunAt(sc, s.turn);
+  // The shift that just played (only right after "Do it!"), so only what really changed flashes.
+  const last = tx ? s.history[s.history.length - 1] : undefined;
+  const lifeWas = last?.lifeStart, shieldWas = last ? (s.history[s.history.length - 2]?.shield ?? 0) : undefined, newStars = last?.sci ?? 0;
   const stars: ReactNode[] = [];
-  for (let i = 0; i < 6; i++) stars.push(<Star key={i} on={i < s.science} className={tx && i < s.science && i >= s.science - 2 ? 'new' : ''} />);
+  for (let i = 0; i < 6; i++) stars.push(<Star key={i} on={i < s.science} className={i < s.science && i >= s.science - newStars ? 'new' : ''} />);
   return <>
     <div className="stat wide">
       <div className="ro"><Icon name="battery" size={34} /><span><span className="l">POWER: battery for the base</span><b>{s.power}</b> <span className="l" style={{ display: 'inline' }}>of {s.cap}<Arrow a={s.power} b={pr.power} /></span></span></div>
-      <BatteryCells s={s} pr={pr.power} prev={prev} />
+      <BatteryCells s={s} pr={pr.power} prev={tx ? prev : null} />
       <span className="l" style={{ marginTop: 6 }}>This shift: sun +{sun}{sun < K.sun ? ' (a hill blocks some sun)' : ''}, then the base takes −{K.upkeep}.</span>
     </div>
     <div className="stat s2">
       <div className="ro"><Icon name="drop" size={30} /><span><span className="l">CREW SUPPLIES</span><b>{s.life}</b><span className="l" style={{ display: 'inline' }}> /{K.lifeCap}<Arrow a={s.life} b={pr.life} /></span></span></div>
-      <Segments cur={s.life} tot={K.lifeCap} pr={pr.life} low={2} />
+      <Segments cur={s.life} tot={K.lifeCap} pr={pr.life} low={2} was={lifeWas} />
       <span className="l">A simple mix of air, water and food. The crew uses 1 each shift.</span>
     </div>
     <div className="stat s1">
       <div className="ro"><Icon name="shield" size={30} /><span><span className="l">CREW PROTECTION</span><b>{s.shield}</b><span className="l" style={{ display: 'inline' }}> layers · storm needs {sc.req}<Arrow a={s.shield} b={pr.shield} /></span></span></div>
-      <Segments cur={s.shield} tot={K.shieldCap} pr={pr.shield} cls="sh" />
+      <Segments cur={s.shield} tot={K.shieldCap} pr={pr.shield} cls="sh" was={shieldWas} />
       <span className="l">Thick walls that block some radiation.</span>
     </div>
     <div className="stat s3">

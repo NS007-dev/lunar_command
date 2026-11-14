@@ -27,8 +27,8 @@ const toPrep = (picks: Gadget[] = []) => run([{ type: 'ev', k: 0 }, ...picks.map
 const ready = () => run([{ type: 'launch' }], toPrep(['walls', 'garden']));
 const finished = () => {
   let u = ready();
-  for (let i = 0; i < 12 && u.screen === 'mission'; i++) u = run([{ type: 'pick', k: 'rest' }, { type: 'confirm' }, { type: 'resolve' }], u);
-  return u;
+  for (let i = 0; i < 12 && !u.game?.ended; i++) u = run([{ type: 'pick', k: 'rest' }, { type: 'confirm' }, { type: 'resolve' }], u);
+  return uiReducer(u, { type: 'results' }); // Issue #4: the last report shows first
 };
 /** A mission screen showing the given game. */
 const onMission = (g: GameState): UIState => ({ ...ready(), game: g });
@@ -177,11 +177,11 @@ describe('screen guards', () => {
   const ALLOWED: Record<UIAction['type'], Screen[]> = {
     'go-brief': ['launch'], 'go-event': ['brief', 'prep', 'debrief'], ev: ['event'], up: ['prep'], launch: ['prep'],
     pick: ['mission'], cancel: ['mission'], confirm: ['mission'], resolve: ['mission'], hint: ['mission'], expl: ['mission'], sq: ['mission'],
-    replay: ['debrief'],
+    results: ['mission'], replay: ['debrief'],
   };
   const ACTIONS: UIAction[] = [
     { type: 'go-brief' }, { type: 'go-event' }, { type: 'ev', k: 1 }, { type: 'up', k: 'lab' }, { type: 'launch' }, { type: 'pick', k: 'rest' },
-    { type: 'cancel' }, { type: 'confirm' }, { type: 'resolve' }, { type: 'hint' }, { type: 'expl' }, { type: 'sq', k: 0 }, { type: 'replay' },
+    { type: 'cancel' }, { type: 'confirm' }, { type: 'resolve' }, { type: 'hint' }, { type: 'expl' }, { type: 'sq', k: 0 }, { type: 'results' }, { type: 'replay' },
   ];
   for (const [screen, make] of Object.entries(SCREENS) as [Screen, () => UIState][]) {
     it(`on the ${screen} screen, buttons from other screens change nothing`, () => {

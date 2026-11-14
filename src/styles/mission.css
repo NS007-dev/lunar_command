@@ -62,7 +62,24 @@
     font-family: var(--d);
     font-size: 1.25rem;
     box-shadow: 0 6px 0 var(--ink);
-    margin: 18px 0 10px;
+    margin: 18px 0 10px
+}
+
+/* Storm coming / storm over (Issue #4). The storm itself keeps the coral look. */
+.alert.soon {
+    background: var(--sun)
+}
+
+.alert.over {
+    background: var(--mint)
+}
+
+.alert svg.i {
+    flex: none
+}
+
+/* Only when a shift has just started, not on every redraw */
+.alert.shake {
     animation: shake .6s both
 }
 
@@ -258,6 +275,39 @@
 
 .stars svg.new {
     animation: pop .6s both
+}
+
+/* What changed in the shift that just played (Issue #4): new supply/shelter segments pop in, used ones fade out */
+.sg i.chg {
+    animation: sgIn .7s ease both
+}
+
+@keyframes sgIn {
+    0% {
+        background: var(--sun);
+        transform: scaleY(1.6)
+    }
+}
+
+.sg i.gone {
+    animation: sgOut .9s ease both
+}
+
+@keyframes sgOut {
+    0% {
+        background: var(--coral)
+    }
+}
+
+/* Shelter blocks that were just built in the Moon window */
+.vp .nb {
+    animation: nbIn .6s ease both
+}
+
+@keyframes nbIn {
+    from {
+        opacity: 0
+    }
 }
 
 .acts {

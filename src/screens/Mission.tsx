@@ -1,46 +1,67 @@
+import type { ReactNode } from 'react';
 import { ActionButton } from '../components/ActionButton';
 import { Icon } from '../components/Icon';
 import { MoonScene } from '../components/MoonScene';
-import { PipSays } from '../components/Pip';
+import { PipSays, type PipMood } from '../components/Pip';
+import { PipReport } from '../components/PipReport';
 import { ResourceDisplay, type Preview } from '../components/ResourceDisplay';
 import { ShiftPath } from '../components/ShiftPath';
 import { SCI } from '../data/scienceFacts';
 import { known, step } from '../game/engine';
-import { reason } from '../game/mentor';
+import { previewText, stormNews, type ShiftReport, type Tone } from '../game/mentor';
 import { ACTS, K, SC, inStorm, sunAt, type ActionId } from '../game/scenarios';
 import type { GameState } from '../game/types';
 
 const smallBtn = { fontSize: '1rem', padding: '6px 16px', boxShadow: '0 4px 0 var(--ink)' };
+const NEWS_ICON = { soon: 'warn', here: 'warn', over: 'tick' } as const;
 
 /** The main game screen: one shift at a time. */
-export function Mission({ s, pending, resolving, mentor, prev, tx, onPick, onConfirm, onCancel, onHint, onExplain, onAsk }: {
+export function Mission({ s, pending, resolving, mentor, prev, tx, report, showReport, refused, onPick, onConfirm, onCancel, onHint, onExplain, onAsk, onResults }: {
   s: GameState; pending: ActionId | null; resolving: boolean; mentor: string; prev: number | null; tx: boolean;
+  report: ShiftReport | null; showReport: boolean; refused: boolean;
   onPick: (a: ActionId) => void; onConfirm: () => void; onCancel: () => void; onHint: () => void; onExplain: () => void; onAsk: (i: number) => void;
+  onResults: () => void;
 }) {
   const e = SC[s.sc], t = s.turn, pv = pending ? step(s, pending) : null, ok = !!(pv && pv.ok && pv.rec.safe), kn = known(s);
-  const storm = inStorm(e, t), sun = sunAt(e, t), shade = sun < K.sun;
+  const storm = inStorm(e, t), sun = sunAt(e, t), shade = sun < K.sun, news = stormNews(s);
   const preview: Preview | null = ok && pv && pv.ok ? { power: pv.state.power, life: pv.state.life, shield: pv.state.shield, sci: pv.state.science } : null;
-  const mood = storm || s.life <= 3 || s.power <= K.upkeep + 1 ? 'worried' : 'happy';
+  // A shift that just played in this render (for the "what changed" flashes)
+  const last = tx ? s.history[s.history.length - 1] : undefined;
+  const shieldWas = last ? (s.history[s.history.length - 2]?.shield ?? 0) : undefined;
 
-  let say = mentor || (storm ? 'A radiation storm is here! Fast particles from the Sun. Stay inside and check your shelter.' : shade ? "A hill's shadow is blocking some sun. Watch your battery!" : 'What should we do this shift?');
-  if (pending && pv && pv.ok) say = pv.rec.safe
-    ? `If you do this: battery ${pv.rec.powerStart} → ${pv.rec.powerEnd}, supplies ${pv.rec.lifeStart} → ${pv.rec.lifeEnd}, shelter ${pv.rec.shield}, stars ${pv.state.science}.${pv.rec.storm ? (pv.rec.storm.ok ? ` The storm needs ${pv.rec.storm.req} and you will have enough.` : ` The storm needs ${pv.rec.storm.req} but you would have ${pv.rec.storm.shield}. The crew would get extra radiation.`) : ''}`
-    : `Uh oh! ${pv.rec.why === 'power' ? 'The base would be ' + pv.rec.shortfall + ' power short.' : 'Crew supplies would run out.'} The mission would end.`;
-  else if (pending && pv && !pv.ok) say = reason(pv.error, s); // the reducer refuses these, but never show a silent preview
+  let say: ReactNode = mentor || (storm ? 'A radiation storm is here! Fast particles from the Sun. Stay inside and check your shelter.' : shade ? "A hill's shadow is blocking some sun. Watch your battery!" : 'What should we do this shift?');
+  let tone: Tone | undefined = refused ? 'warn' : undefined;
+  let mood: PipMood = refused || storm || s.life <= 3 || s.power <= K.upkeep + 1 ? 'worried' : 'happy';
+  if (pending && pv) {
+    say = previewText(s, pending); // the reducer refuses impossible jobs, but never show a silent preview
+    tone = pv.ok && !pv.rec.safe ? 'bad' : undefined;
+    if (tone) mood = 'worried';
+  } else if (showReport && report) {
+    say = <PipReport r={report} />;
+    tone = report.tone;
+    mood = report.tone === 'good' ? 'cheer' : 'worried';
+  }
 
-  const rad = s.protectedShifts + s.exposure === 0
-    ? (t > e.at + e.len - 1 ? 'Radiation storm: over.' : 'Radiation storm: not yet.')
-    : `Radiation storm so far: ${s.protectedShifts} shift${s.protectedShifts === 1 ? '' : 's'} protected, ${s.exposure} not protected.`;
+  const over = t > e.at + e.len - 1, seen = s.protectedShifts + s.exposure;
+  const rad = seen === 0
+    ? (over ? 'Radiation storm: over.' : 'Radiation storm: not yet.')
+    : `Radiation storm${over ? ' is over' : ' so far'}: ${s.protectedShifts} shift${s.protectedShifts === 1 ? '' : 's'} protected, ${s.exposure} not protected.`;
   const earth = s.msgAt == null ? 'No message sent yet.' : kn ? `Reply: the radiation storm lasts shifts ${e.at} to ${e.at + e.len - 1}.` : 'Message sent. The team needs a shift to study the Sun.';
   const garden = s.plant == null ? 'Nothing planted.' : s.plant - t <= 0 ? 'Food is ready this shift!' : 'Growing. Ready in ' + (s.plant - t) + ' shifts.';
 
   return (
     <section className={tx ? 'tx' : ''}>
       <ShiftPath s={s} />
-      {storm && <div className="alert" role="alert"><Icon name="warn" size={32} /><span>Radiation storm now (shift {t - e.at + 1} of {e.len})! Crew protection needs {e.req}. Stay inside.</span></div>}
+      {/* Storm news is read out by the live region when the shift starts, so this banner is not an alert itself
+          (that made it shake and be read again on every click). It only shakes when the shift has just begun. */}
+      {news && (
+        <div className={`alert ${news.kind}${tx ? ' shake' : ''}`}>
+          <Icon name={NEWS_ICON[news.kind]} size={32} /><span>{news.text}</span>
+        </div>
+      )}
       <div className="mis">
         <div>
-          <div className="vp"><MoonScene s={s} full /></div>
+          <div className="vp"><MoonScene s={s} full newFrom={shieldWas} /></div>
           <div className="stats"><ResourceDisplay s={s} preview={preview} prev={prev} tx={tx} /></div>
           <div className="info">
             <div className="l2">{rad}</div>
@@ -49,18 +70,25 @@ export function Mission({ s, pending, resolving, mentor, prev, tx, onPick, onCon
           </div>
         </div>
         <div>
-          <PipSays mood={pending && pv && pv.ok && !pv.rec.safe ? 'worried' : mood} live>{say}</PipSays>
-          <div className="acts">
-            {ACTS.map(a => <ActionButton key={a} s={s} a={a} pressed={pending === a} resolving={resolving} onPick={onPick} />)}
-          </div>
-          {pending && pv && pv.ok && (
-            <div className="pop">
-              <button className="btn g" onClick={onConfirm} disabled={resolving}>Do it!</button>{'   '}
-              <button className="btn w" onClick={onCancel} style={{ fontSize: '1.1rem' }}>Wait, no</button>
+          <PipSays mood={mood} tone={tone}>{say}</PipSays>
+          {s.ended ? (
+            <p className="pop" style={{ margin: '18px 0' }}>
+              {/* After the last shift the jobs go away, and focus moves here so keyboard users can carry on. */}
+              <button className="btn g" onClick={onResults} autoFocus>See your results <span aria-hidden="true">▶</span></button>
+            </p>
+          ) : <>
+            <div className="acts">
+              {ACTS.map(a => <ActionButton key={a} s={s} a={a} pressed={pending === a} resolving={resolving} onPick={onPick} />)}
             </div>
-          )}
+            {pending && pv && pv.ok && (
+              <div className="pop">
+                <button className="btn g" onClick={onConfirm} disabled={resolving}>Do it!</button>{'   '}
+                <button className="btn w" onClick={onCancel} style={{ fontSize: '1.1rem' }}>Wait, no</button>
+              </div>
+            )}
+          </>}
           <p style={{ marginTop: 20 }}>
-            <button className="btn w" onClick={onHint} style={smallBtn}>Hint</button>{' '}
+            {!s.ended && <><button className="btn w" onClick={onHint} style={smallBtn}>Hint</button>{' '}</>}
             <button className="btn w" onClick={onExplain} style={smallBtn}>What happened?</button>
           </p>
           <p style={{ margin: '14px 0 4px' }}><b>Ask Pip:</b></p>
