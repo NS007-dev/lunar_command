@@ -1,0 +1,61 @@
+/* Real record / Game rule tags and the segment bars.
+   Copied from the original index.html stylesheet (see legacy/index.html). */
+
+.tg {
+    display: inline-block;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 0 8px;
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-right: 8px
+}
+
+.tg.n {
+    background: var(--sky)
+}
+
+.tg.r {
+    background: var(--sun)
+}
+
+.tg.m {
+    background: var(--pink)
+}
+
+.sg {
+    display: flex;
+    gap: 3px;
+    margin: 6px 0
+}
+
+.sg i {
+    flex: 1;
+    height: 16px;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    background: #e3e1d6
+}
+
+.sg i.on {
+    background: var(--sky)
+}
+
+.sg.sh i.on {
+    background: #c9c3b0
+}
+
+.sg i.lo {
+    background: var(--coral)
+}
+
+.sg i.gl {
+    background: none;
+    border: 2px dashed var(--coral)
+}
+
+.sg i.gb {
+    background: none;
+    border: 2px dashed #1b6aa8
+}

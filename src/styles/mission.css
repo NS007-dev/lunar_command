@@ -1,0 +1,413 @@
+/* Mission screen: shift path, storm alert, Moon window, resource panels, action buttons, info boxes.
+   Copied from the original index.html stylesheet (see legacy/index.html). */
+
+.path {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+    margin: 4px 0 14px
+}
+
+.path i {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    background: var(--night);
+    color: var(--moon);
+    font: normal 1.2rem var(--d);
+    position: relative
+}
+
+.path i.done {
+    background: var(--mint);
+    color: var(--ink)
+}
+
+.path i.now {
+    background: var(--sun);
+    color: var(--ink);
+    transform: scale(1.25);
+    box-shadow: 0 4px 0 var(--ink)
+}
+
+.path i.bad {
+    border-color: var(--coral);
+    box-shadow: 0 0 0 3px var(--coral)
+}
+
+.path u {
+    text-decoration: none;
+    font-size: .7rem;
+    position: absolute;
+    bottom: -18px;
+    color: var(--coral);
+    font-family: var(--b);
+    font-weight: 700;
+    white-space: nowrap
+}
+
+.alert {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    background: var(--coral);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-family: var(--d);
+    font-size: 1.25rem;
+    box-shadow: 0 6px 0 var(--ink);
+    margin: 18px 0 10px;
+    animation: shake .6s both
+}
+
+@keyframes shake {
+    20% {
+        transform: translateX(-12px) rotate(-1deg)
+    }
+
+    40% {
+        transform: translateX(12px) rotate(1deg)
+    }
+
+    60% {
+        transform: translateX(-8px)
+    }
+
+    80% {
+        transform: translateX(6px)
+    }
+}
+
+.mis {
+    display: grid;
+    gap: 22px;
+    grid-template-columns: 1fr
+}
+
+@media(min-width:980px) {
+    .mis {
+        grid-template-columns: 7fr 5fr
+    }
+}
+
+.vp {
+    border: 5px solid var(--ink);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 0 var(--ink);
+    aspect-ratio: 2/1.02;
+    background: var(--night)
+}
+
+.vp svg {
+    width: 100%;
+    height: 100%;
+    display: block
+}
+
+.tx .vp {
+    animation: wob .6s both
+}
+
+@keyframes wob {
+    30% {
+        transform: scale(.985)
+    }
+
+    60% {
+        transform: scale(1.01)
+    }
+}
+
+.stats {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 20px
+}
+
+.stats .wide {
+    grid-column: 1/-1
+}
+
+.stat {
+    background: var(--moon);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 5px 0 var(--ink)
+}
+
+.stat b {
+    font-family: var(--d);
+    font-weight: 400;
+    font-size: 2.2rem;
+    line-height: 1
+}
+
+.stat span.l {
+    display: block;
+    font-weight: 700;
+    font-size: .85rem
+}
+
+.stat.s1 {
+    transform: rotate(-1deg);
+    background: #ffe9a8
+}
+
+.stat.s2 {
+    transform: rotate(1deg);
+    background: #cdeeff
+}
+
+.stat.s3 {
+    transform: rotate(-.6deg);
+    background: #ffd9e8
+}
+
+.stat .ro {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.stat svg.i {
+    width: 34px;
+    height: 34px;
+    flex: none
+}
+
+.cells {
+    display: flex;
+    gap: 3px;
+    height: 34px;
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 3px;
+    background: #fff;
+    position: relative;
+    margin-top: 8px
+}
+
+.cells::after {
+    content: "";
+    position: absolute;
+    right: -12px;
+    top: 8px;
+    width: 8px;
+    height: 12px;
+    background: var(--ink);
+    border-radius: 0 4px 4px 0
+}
+
+.cells i {
+    flex: 1;
+    background: #e3e1d6;
+    border-radius: 3px
+}
+
+.cells i.on {
+    background: var(--mint)
+}
+
+.cells i.lo {
+    background: var(--coral)
+}
+
+.cells i.chg {
+    animation: cp .7s ease both
+}
+
+@keyframes cp {
+    0% {
+        background: var(--sun);
+        transform: scaleY(1.5)
+    }
+}
+
+.cells i.gl {
+    background: none;
+    outline: 2px dashed var(--coral);
+    outline-offset: -2px
+}
+
+.cells i.gb {
+    background: none;
+    outline: 2px dashed #1b9c70;
+    outline-offset: -2px
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+    margin-top: 6px
+}
+
+.stars svg {
+    width: 26px;
+    height: 26px
+}
+
+.stars svg.new {
+    animation: pop .6s both
+}
+
+.acts {
+    display: grid;
+    gap: 12px;
+    margin: 14px 0
+}
+
+.act {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    background: var(--moon);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 0 6px 0 var(--ink);
+    padding: 10px 14px;
+    transition: transform .12s
+}
+
+.act:not(:disabled):hover {
+    transform: translateY(-3px) rotate(-.6deg)
+}
+
+.act:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    background: #cfcab9
+}
+
+.act[aria-pressed=true] {
+    background: var(--sun);
+    transform: translateX(8px)
+}
+
+.act h3 {
+    font-size: 1.2rem
+}
+
+.act small {
+    display: block;
+    font-size: .88rem;
+    line-height: 1.3
+}
+
+.act .c {
+    font-family: var(--d);
+    font-size: 1.4rem;
+    text-align: right
+}
+
+.act .c small {
+    font-family: var(--b);
+    font-weight: 700
+}
+
+.act svg {
+    width: 50px;
+    height: 50px
+}
+
+.act .why {
+    color: #b3321c;
+    font-weight: 700
+}
+
+.dots {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0
+}
+
+.info {
+    display: grid;
+    gap: 8px;
+    margin: 14px 0
+}
+
+.info .l2 {
+    background: #141c44;
+    border: 2px solid var(--moon);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: .95rem
+}
+
+.path i {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem
+}
+
+.path i.st {
+    border-color: var(--sun);
+    box-shadow: 0 0 0 3px var(--sun)
+}
+
+.path {
+    margin-bottom: 22px
+}
+
+.path u {
+    color: var(--sun);
+    bottom: -20px
+}
+
+.stats .stat.wide {
+    grid-column: 1/-1
+}
+
+.stats {
+    grid-template-columns: repeat(3, 1fr)
+}
+
+@media(max-width:640px) {
+    .stats {
+        grid-template-columns: 1fr
+    }
+}
+
+.path {
+    margin: 30px 0 32px
+}
+
+.path s {
+    position: absolute;
+    top: -22px;
+    font: 700 .72rem var(--b);
+    color: #c4cbf2;
+    text-decoration: none;
+    white-space: nowrap
+}
+
+.path i.shd {
+    border-style: dashed;
+    border-color: #9aa3d6;
+    background: #1a2150
+}
+
+.path i.shd.done {
+    background: var(--mint)
+}
+
+.path i.shd.now {
+    background: var(--sun)
+}
+
+.stat .l {
+    line-height: 1.3
+}

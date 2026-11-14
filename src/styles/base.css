@@ -1,0 +1,192 @@
+/* Colours, fonts, page layout, buttons, cards and shared animations.
+   Copied from the original index.html stylesheet (see legacy/index.html). */
+
+:root {
+    --ink: #14193a;
+    --night: #222c63;
+    --moon: #fff1cf;
+    --sun: #ffc93c;
+    --coral: #ff6a4d;
+    --mint: #4fd1a1;
+    --sky: #6ec3ff;
+    --pink: #ff9ec7;
+    --d: 'Fredoka', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif;
+    --b: 'Andika', 'Trebuchet MS', system-ui, sans-serif;
+    color-scheme: dark;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px)
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    margin: 0;
+    background: var(--night);
+    color: var(--moon);
+    font-family: var(--b);
+    font-size: 18px;
+    line-height: 1.5
+}
+
+#bg {
+    position: fixed;
+    inset: 0;
+    z-index: -2
+}
+
+#bg svg {
+    width: 100%;
+    height: 100%;
+    display: block
+}
+
+#scrim {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: var(--night);
+    opacity: .5
+}
+
+main {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 18px clamp(14px, 3vw, 36px) 60px
+}
+
+h1,
+h2,
+h3 {
+    font-family: var(--d);
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.1
+}
+
+h1 {
+    font-size: clamp(3.4rem, 14vw, 9rem);
+    color: var(--sun);
+    -webkit-text-stroke: 2px var(--ink);
+    paint-order: stroke fill;
+    text-shadow: 0 6px 0 var(--ink);
+    letter-spacing: .01em;
+    transform: rotate(-3deg)
+}
+
+h2 {
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    color: var(--sun);
+    text-shadow: 0 4px 0 var(--ink)
+}
+
+h3 {
+    font-size: 1.3rem
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    padding: 0;
+    text-align: left
+}
+
+button:focus-visible {
+    outline: 4px solid var(--sky);
+    outline-offset: 3px;
+    border-radius: 16px
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--d);
+    font-size: 1.5rem;
+    background: var(--coral);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 12px 28px;
+    box-shadow: 0 7px 0 var(--ink);
+    transition: transform .12s, box-shadow .12s;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 0 var(--ink)
+}
+
+.btn:active {
+    transform: translateY(5px);
+    box-shadow: 0 2px 0 var(--ink)
+}
+
+.btn:disabled {
+    background: #8a90b5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 0 7px 0 var(--ink)
+}
+
+.btn.g {
+    background: var(--mint)
+}
+
+.btn.w {
+    background: var(--moon);
+    color: var(--ink);
+    -webkit-text-stroke: 0
+}
+
+.card {
+    background: var(--moon);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 0 7px 0 var(--ink);
+    padding: 16px 18px
+}
+
+.pop {
+    animation: pop .6s cubic-bezier(.3, 1.6, .5, 1) both
+}
+
+@keyframes pop {
+    from {
+        opacity: 0;
+        transform: scale(.6) rotate(-6deg)
+    }
+}
+
+a {
+    color: var(--sky);
+    font-weight: 700
+}
+
+.lnk {
+    text-decoration: underline;
+    font-weight: 700;
+    color: var(--moon);
+    padding: 6px 0
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important
+    }
+}
+
+details summary {
+    outline-offset: 4px
+}
