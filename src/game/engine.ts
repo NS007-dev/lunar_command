@@ -3,9 +3,10 @@ import { K, SC, UP, inStorm, sunAt, type ActionId, type Gadget } from './scenari
 import { finish } from './scoring';
 import type { GameState, Plan, Result, ShiftRecord } from './types';
 
+/** Starts a mission. Needs a real Sun event and exactly two different, real gadgets. */
 export function init(sc: number, load: Gadget[]): Result<{ state: GameState }> {
   if (!SC[sc]) return { ok: false, error: 'Pick a Sun event.' };
-  if (!Array.isArray(load) || load.length !== 2 || new Set(load).size !== 2 || load.some(k => !UP[k]))
+  if (!Array.isArray(load) || load.length !== 2 || new Set(load).size !== 2 || load.some(k => !Object.prototype.hasOwnProperty.call(UP, k)))
     return { ok: false, error: 'Choose exactly two different gadgets.' };
   const b = load.includes('battery');
   return {
