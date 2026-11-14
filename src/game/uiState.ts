@@ -56,6 +56,9 @@ const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'la
 
 function apply(ui: UIState, a: UIAction): UIState | null {
   const G = ui.game;
+  // While a confirmed shift is playing out (the short pause after "Do it!"), ignore every button
+  // except the 'resolve' that finishes it. Otherwise another click could change or cancel the shift.
+  if (ui.resolving && a.type !== 'resolve') return null;
   switch (a.type) {
     case 'go-brief': return { ...ui, screen: 'brief' };
     case 'go-event': return { ...ui, screen: 'event', game: null };
