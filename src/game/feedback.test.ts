@@ -251,7 +251,7 @@ describe('feedback on the mission screen', () => {
   it('playing again forgets the old report', () => {
     const last = run(doIt('rest'), onMission({ ...start(0, ['walls', 'garden']), turn: K.shifts, life: 8 }));
     expect(last.report).not.toBe(null);
-    const again = run([{ type: 'results' }, { type: 'replay' }, { type: 'up', k: 'lab' }, { type: 'up', k: 'walls' }, { type: 'launch' }], last);
+    const again = run([{ type: 'results' }, { type: 'restart' }, { type: 'restart-yes' }, { type: 'ev', k: 0 }, { type: 'up', k: 'lab' }, { type: 'up', k: 'walls' }, { type: 'launch' }], last);
     expect([again.screen, again.report, again.showReport]).toEqual(['mission', null, false]);
   });
 });

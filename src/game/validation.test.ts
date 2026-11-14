@@ -177,11 +177,12 @@ describe('screen guards', () => {
   const ALLOWED: Record<UIAction['type'], Screen[]> = {
     'go-brief': ['launch'], 'go-event': ['brief', 'prep', 'debrief'], ev: ['event'], up: ['prep'], launch: ['prep'],
     pick: ['mission'], cancel: ['mission'], confirm: ['mission'], resolve: ['mission'], hint: ['mission'], expl: ['mission'], sq: ['mission'],
-    results: ['mission'], replay: ['debrief'],
+    results: ['mission'], restart: ['debrief'], 'restart-no': ['debrief'], 'restart-yes': ['debrief'],
   };
   const ACTIONS: UIAction[] = [
     { type: 'go-brief' }, { type: 'go-event' }, { type: 'ev', k: 1 }, { type: 'up', k: 'lab' }, { type: 'launch' }, { type: 'pick', k: 'rest' },
-    { type: 'cancel' }, { type: 'confirm' }, { type: 'resolve' }, { type: 'hint' }, { type: 'expl' }, { type: 'sq', k: 0 }, { type: 'results' }, { type: 'replay' },
+    { type: 'cancel' }, { type: 'confirm' }, { type: 'resolve' }, { type: 'hint' }, { type: 'expl' }, { type: 'sq', k: 0 }, { type: 'results' },
+    { type: 'restart' }, { type: 'restart-no' }, { type: 'restart-yes' },
   ];
   for (const [screen, make] of Object.entries(SCREENS) as [Screen, () => UIState][]) {
     it(`on the ${screen} screen, buttons from other screens change nothing`, () => {
@@ -190,10 +191,10 @@ describe('screen guards', () => {
       for (const a of ACTIONS) if (!ALLOWED[a.type].includes(screen)) expect(uiReducer(u, a), `${a.type} on ${screen}`).toBe(u);
     });
   }
-  it('"launch" or "replay" during a mission cannot restart it', () => {
+  it('"launch" or "Yes, restart!" during a mission cannot restart it', () => {
     const mid = run([{ type: 'pick', k: 'shelter' }, { type: 'confirm' }, { type: 'resolve' }], ready());
     expect(uiReducer(mid, { type: 'launch' })).toBe(mid);
-    expect(uiReducer(mid, { type: 'replay' })).toBe(mid);
+    expect(uiReducer(mid, { type: 'restart-yes' })).toBe(mid);
     expect(uiReducer(mid, { type: 'go-event' })).toBe(mid);
     expect(mid.game?.history.length).toBe(1);
   });

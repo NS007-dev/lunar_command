@@ -39,11 +39,14 @@ export interface UIState {
   announce: string;
   /** Bumped on every announcement, so the same words are read again if they repeat */
   announceN: number;
+  /** Results screen: Pip is asking "Are you sure?" before restarting the mission */
+  restartAsk: boolean;
 }
 
 export const initialUI: UIState = {
   screen: 'launch', sc: 0, sel: [], pending: null, resolving: false, mentor: '', prev: null, tx: false, game: null,
   renderId: 0, focusHeading: false, report: null, showReport: false, refused: false, announce: '', announceN: 0,
+  restartAsk: false,
 };
 
 export type UIAction =
@@ -62,9 +65,24 @@ export type UIAction =
   | { type: 'sq'; k: number }
   /** "See your results": leaves the finished mission for the debrief */
   | { type: 'results' }
-  | { type: 'replay' };
+  /** "Restart mission": Pip asks the player to confirm. Changes nothing else. */
+  | { type: 'restart' }
+  /** "No, go back": closes the question and keeps the results. */
+  | { type: 'restart-no' }
+  /** "Yes, restart!": throws the old mission away and goes back to choosing a Sun event. */
+  | { type: 'restart-yes' };
 
-const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'launch', 'results', 'replay']);
+const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'launch', 'results', 'restart-yes']);
+
+/**
+ * Opening and closing the restart question keep the Results screen as it is (no redraw), so its confetti does not
+ * replay and keyboard focus can go back to the "Restart mission" button.
+ */
+const NO_REDRAW = new Set<UIAction['type']>(['restart', 'restart-no']);
+
+/** What Pip asks before a restart. */
+export const RESTART_ASK = 'Are you sure you want to start a new mission? Your current mission progress will be cleared.';
+export const RESTART_KEPT = 'Okay! Your mission results are still here.';
 
 /**
  * The screens each button exists on. A button sent from any other screen is ignored, so it can never
@@ -73,7 +91,7 @@ const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'la
 const SCREENS: Record<UIAction['type'], readonly Screen[]> = {
   'go-brief': ['launch'], 'go-event': ['brief', 'prep', 'debrief'], ev: ['event'], up: ['prep'], launch: ['prep'],
   pick: ['mission'], cancel: ['mission'], confirm: ['mission'], resolve: ['mission'], hint: ['mission'], expl: ['mission'], sq: ['mission'],
-  results: ['mission'], replay: ['debrief'],
+  results: ['mission'], restart: ['debrief'], 'restart-no': ['debrief'], 'restart-yes': ['debrief'],
 };
 
 /** What "What happened?" says before the first shift. */
@@ -117,7 +135,7 @@ function apply(ui: UIState, a: UIAction): UIState | null {
   if (!SCREENS[a.type]?.includes(ui.screen)) return null;
   switch (a.type) {
     case 'go-brief': return { ...ui, screen: 'brief' };
-    case 'go-event': return { ...ui, screen: 'event', game: null };
+    case 'go-event': return { ...ui, screen: 'event', game: null, restartAsk: false };
     case 'ev':
       if (!isScenario(a.k)) return null;
       return { ...ui, sc: a.k, sel: [], screen: 'prep', mentor: '' };
@@ -173,8 +191,21 @@ function apply(ui: UIState, a: UIAction): UIState | null {
       return say({ ...ui, pending: null, mentor: SCI[a.k].a, showReport: false }, ui, SCI[a.k].a);
     case 'results':
       if (!G?.ended) return null;
-      return { ...ui, screen: 'debrief', pending: null, mentor: '', announce: '' };
-    case 'replay': return { ...ui, game: null, sel: [], screen: 'prep', pending: null, mentor: '', prev: null, report: null, showReport: false };
+      return { ...ui, screen: 'debrief', pending: null, mentor: '', announce: '', restartAsk: false };
+    case 'restart':
+      if (ui.restartAsk) return null;
+      return say({ ...ui, restartAsk: true }, ui, RESTART_ASK);
+    case 'restart-no':
+      if (!ui.restartAsk) return null;
+      return say({ ...ui, restartAsk: false }, ui, RESTART_KEPT);
+    case 'restart-yes':
+      // Only after Pip asked. Dropping the GameState drops its history, science, shelter, garden, storm
+      // protection and everything else; the next mission is made fresh by init() when "Blast off!" is pressed.
+      if (!ui.restartAsk) return null;
+      return {
+        ...ui, screen: 'event', game: null, sel: [], pending: null, resolving: false, mentor: '', prev: null,
+        report: null, showReport: false, restartAsk: false, announce: '',
+      };
   }
   return null;
 }
@@ -187,7 +218,7 @@ export function uiReducer(ui: UIState, a: UIAction): UIState {
   if (a.type !== 'resolve') next.tx = false;
   next.refused = refusals.has(next);
   if (next.refused) { next.focusHeading = false; return next; }
-  next.renderId = ui.renderId + 1;
+  next.renderId = NO_REDRAW.has(a.type) ? ui.renderId : ui.renderId + 1;
   next.focusHeading = FOCUS_AFTER.has(a.type);
   return next;
 }

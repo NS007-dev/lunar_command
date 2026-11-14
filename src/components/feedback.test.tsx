@@ -9,6 +9,7 @@ import { init, step } from '../game/engine';
 import { shiftReport, type ShiftReport } from '../game/mentor';
 import { K, SC, type ActionId } from '../game/scenarios';
 import type { GameState } from '../game/types';
+import { RESTART_ASK } from '../game/uiState';
 import { Mission } from '../screens/Mission';
 import { Results } from '../screens/Results';
 import { MoonScene } from './MoonScene';
@@ -83,10 +84,29 @@ describe('the last shift', () => {
 describe('Results', () => {
   it('a critical failure says exactly what ran out', () => {
     const { after } = play({ ...start(), life: 1, turn: 2 }, 'rest');
-    const html = renderToStaticMarkup(<Results s={after} onReplay={noop} onOtherEvent={noop} />);
+    const html = renderToStaticMarkup(<Results s={after} onRestart={noop} onRestartYes={noop} onRestartNo={noop} onOtherEvent={noop} />);
     expect(html).toContain('Oh no! The crew ran out of supplies');
     expect(html).toContain('On shift 2, the crew used their last supplies.');
     expect(html).toContain('class="say bad"');
+  });
+  it('offers "Restart mission" and "Try another Sun event"', () => {
+    const { after } = play({ ...start(), life: 1, turn: 2 }, 'rest');
+    const html = renderToStaticMarkup(<Results s={after} onRestart={noop} onRestartYes={noop} onRestartNo={noop} onOtherEvent={noop} />);
+    expect(html).toContain('Restart mission');
+    expect(html).toContain('Try another Sun event');
+    expect(html).not.toContain('Play again');
+    expect(html).not.toContain('Yes, restart!');
+  });
+  it('while asking, Pip asks the question with "Yes, restart!" and "No, go back" in a labelled group', () => {
+    const { after } = play({ ...start(), life: 1, turn: 2 }, 'rest');
+    const html = renderToStaticMarkup(<Results s={after} asking onRestart={noop} onRestartYes={noop} onRestartNo={noop} onOtherEvent={noop} />);
+    expect(html).toContain('role="group" aria-labelledby="restart-q"');
+    expect(html).toContain(`<span id="restart-q">${RESTART_ASK}</span>`);
+    expect(html).toContain('Yes, restart!');
+    expect(html).toContain('No, go back');
+    expect(html).toContain('aria-label="Pip the robot looks worried"');
+    expect(html).not.toContain('Restart mission');
+    expect(html).toContain('Score:'); // the results stay visible behind the question
   });
 });
 

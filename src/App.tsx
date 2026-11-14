@@ -46,7 +46,9 @@ export default function App() {
       report={ui.report} showReport={ui.showReport} refused={ui.refused} onResults={() => dispatch({ type: 'results' })}
       onPick={k => dispatch({ type: 'pick', k })} onConfirm={confirm} onCancel={() => dispatch({ type: 'cancel' })}
       onHint={() => dispatch({ type: 'hint' })} onExplain={() => dispatch({ type: 'expl' })} onAsk={k => dispatch({ type: 'sq', k })} />; break;
-    case 'debrief': if (s) screen = <Results s={s} onReplay={() => dispatch({ type: 'replay' })} onOtherEvent={() => dispatch({ type: 'go-event' })} />; break;
+    case 'debrief': if (s) screen = <Results s={s} asking={ui.restartAsk} onRestart={() => dispatch({ type: 'restart' })}
+      onRestartYes={() => dispatch({ type: 'restart-yes' })} onRestartNo={() => dispatch({ type: 'restart-no' })}
+      onOtherEvent={() => dispatch({ type: 'go-event' })} />; break;
   }
 
   // `key={ui.renderId}` redraws the screen from scratch on every update, like the original did,
