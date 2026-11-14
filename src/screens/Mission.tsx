@@ -6,6 +6,7 @@ import { ResourceDisplay, type Preview } from '../components/ResourceDisplay';
 import { ShiftPath } from '../components/ShiftPath';
 import { SCI } from '../data/scienceFacts';
 import { known, step } from '../game/engine';
+import { reason } from '../game/mentor';
 import { ACTS, K, SC, inStorm, sunAt, type ActionId } from '../game/scenarios';
 import type { GameState } from '../game/types';
 
@@ -25,6 +26,7 @@ export function Mission({ s, pending, resolving, mentor, prev, tx, onPick, onCon
   if (pending && pv && pv.ok) say = pv.rec.safe
     ? `If you do this: battery ${pv.rec.powerStart} → ${pv.rec.powerEnd}, supplies ${pv.rec.lifeStart} → ${pv.rec.lifeEnd}, shelter ${pv.rec.shield}, stars ${pv.state.science}.${pv.rec.storm ? (pv.rec.storm.ok ? ` The storm needs ${pv.rec.storm.req} and you will have enough.` : ` The storm needs ${pv.rec.storm.req} but you would have ${pv.rec.storm.shield}. The crew would get extra radiation.`) : ''}`
     : `Uh oh! ${pv.rec.why === 'power' ? 'The base would be ' + pv.rec.shortfall + ' power short.' : 'Crew supplies would run out.'} The mission would end.`;
+  else if (pending && pv && !pv.ok) say = reason(pv.error, s); // the reducer refuses these, but never show a silent preview
 
   const rad = s.protectedShifts + s.exposure === 0
     ? (t > e.at + e.len - 1 ? 'Radiation storm: over.' : 'Radiation storm: not yet.')

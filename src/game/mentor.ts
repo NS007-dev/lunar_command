@@ -10,6 +10,41 @@ export const kidErr = (e: string) =>
     : /Not enough power/.test(e) ? 'Not enough power left for this.'
       : 'You cannot do this now.';
 
+/**
+ * A clear, specific reason for an engine refusal (shown on action buttons and by Pip).
+ * Matches the engine's exact messages, so the engine's output never has to change. Keeps the numbers
+ * from the power message. `s` (optional) adds detail that depends on the shift, e.g. a garden that is ready today.
+ */
+export function reason(error: string, s?: GameState): string {
+  const pw = /^Not enough power: this costs (\d+) but only (\d+) is left/.exec(error);
+  if (pw) return `Not enough power. This job needs ${pw[1]}, but after this shift's sun and the base's ${K.upkeep}, only ${pw[2]} is left.`;
+  switch (error) {
+    case 'Stay inside! Going outside in a radiation storm is risky.':
+      return `${error} Experiments are outside jobs, so they wait until the storm is over.`;
+    case 'You already have all the stars!':
+      return `You already have all ${K.sciMax} stars!`;
+    case 'Crew supplies are already full.':
+      return `Crew supplies are already full (${K.lifeCap} of ${K.lifeCap}).`;
+    case 'Your garden is already growing.':
+      return s && s.plant === s.turn
+        ? 'Your food is ready to pick this shift, so the garden is still busy. Only one garden can grow at a time.'
+        : 'Your garden is already growing. Only one garden can grow at a time.';
+    case 'Too late! Food needs 3 shifts to grow.':
+      return `Too late! Food needs ${K.growIn} shifts to grow, and the mission ends after shift ${K.shifts}.`;
+    case 'The shelter is as strong as it can be.':
+      return `The shelter is as strong as it can be (${K.shieldCap} layers).`;
+    case 'Earth already got your message.':
+      return 'Earth already got your message. You can only send one.';
+    case 'Crew supplies are too low for this.':
+      return 'Crew supplies are too low for this. This job uses 1 extra supply, and the crew would run out.';
+    case 'Mission is over.':
+      return 'The mission is over. Check your results!';
+    case 'Unknown action.':
+      return "That isn't one of the base's jobs.";
+  }
+  return kidErr(error);
+}
+
 /** "What happened?": explains the last shift. */
 export function explain(s: GameState): string {
   const h = s.history[s.history.length - 1];

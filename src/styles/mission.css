@@ -281,11 +281,12 @@
     transition: transform .12s
 }
 
-.act:not(:disabled):hover {
+.act:not(:disabled):not([aria-disabled=true]):hover {
     transform: translateY(-3px) rotate(-.6deg)
 }
 
-.act:disabled {
+.act:disabled,
+.act[aria-disabled=true] {
     opacity: .5;
     cursor: not-allowed;
     background: #cfcab9

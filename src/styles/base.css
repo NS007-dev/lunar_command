@@ -128,7 +128,8 @@ button:focus-visible {
     box-shadow: 0 2px 0 var(--ink)
 }
 
-.btn:disabled {
+.btn:disabled,
+.btn[aria-disabled=true] {
     background: #8a90b5;
     cursor: not-allowed;
     transform: none;

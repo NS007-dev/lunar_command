@@ -57,6 +57,12 @@ export type ActionId = 'science' | 'recycle' | 'grow' | 'shelter' | 'message' | 
 
 export const ACTS: ActionId[] = ['science', 'recycle', 'grow', 'shelter', 'message', 'rest'];
 
+/** Is `k` one of the four real gadgets? (Not a name every JavaScript object has, like "toString".) */
+export const isGadget = (k: unknown): k is Gadget => typeof k === 'string' && Object.prototype.hasOwnProperty.call(UP, k);
+
+/** Is `k` the index of a real Sun event? */
+export const isScenario = (k: unknown): k is number => Number.isInteger(k) && (k as number) >= 0 && (k as number) < SC.length;
+
 /** Is shift `t` inside the radiation storm? */
 export const inStorm = (sc: Scenario, t: number) => t >= sc.at && t < sc.at + sc.len;
 
