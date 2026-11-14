@@ -92,19 +92,49 @@ The results screen gives a score out of 100. It looks at crew survival, storm pr
 
 ## 🛠️ Current version and technology
 
-The working reference version is currently a **single HTML file** using HTML, CSS and JavaScript. It includes the game engine, screens, styling, SVG artwork and interactions in that file.
-
-We are planning to move it into a more organised React application. The intended tools are:
-
-- React
-- TypeScript
-- Vite
-- CSS (or Tailwind CSS if the team agrees)
-- Vitest or another test tool for checking the game rules
+The game is now a **React + TypeScript app built with Vite**. It looks and plays the same as the original single-file HTML prototype, which is kept in [`legacy/index.html`](legacy/index.html) for reference.
 
 There is no need for a server, account system, database or paid API for the current game concept.
 
-**Please do not assume the React conversion is finished just because this README describes the planned setup.** Update this section when the React app is actually in the repository and has been tested.
+### Running it on your computer
+
+You need [Node.js](https://nodejs.org/) installed. Then, in the project folder:
+
+```bash
+npm install
+```
+
+```bash
+npm run dev
+```
+
+Open the address it prints (usually http://localhost:5173). While the dev server is running, the original prototype is at http://localhost:5173/legacy/index.html so you can compare them.
+
+Other commands:
+
+- `npm run build`: checks the TypeScript and builds the finished site into `dist/`.
+- `npm test`: runs the tests. They play hundreds of random missions on both the new engine and the original prototype's engine and check that every result matches.
+- `npm run lint`: checks the code for common mistakes.
+
+### Where things are
+
+| Folder | What is in it |
+| --- | --- |
+| `src/game/` | The game logic, with no React in it: rules (`engine.ts`), events and gadgets (`scenarios.ts`), scoring (`scoring.ts`), Pip's hints and explanations (`mentor.ts`) and screen state (`uiState.ts`). |
+| `src/data/` | Text: gadget and action descriptions, fun facts, event records, science questions and source links. |
+| `src/components/` | Reusable pieces: Pip, the Moon scene, resource panels, action buttons, the shift path, charts, confetti and the sources box. |
+| `src/screens/` | One file per screen: Welcome, Briefing, EventSelection, GadgetSelection, Mission and Results. |
+| `src/styles/` | The CSS, split by screen. It is the original stylesheet, kept in the same order. |
+| `tests/` | Tests for the game engine. |
+| `legacy/` | The original HTML prototype. |
+
+### Notes from the React conversion
+
+We checked that nothing from the original was lost. A script played the same 95 clicks through both versions (all three events, success, survival and critical-failure endings, hints, "What happened?", Ask Pip, replay, changing event) on a desktop screen and a phone screen. It compared every element's text, layout, colours and animations, and they matched. Things that might look surprising in the code:
+
+- **The screen is redrawn from scratch after every click.** The original rebuilt the whole page each time, so its pop, shake and flash animations replayed after every click. The React version does the same on purpose (see `renderId` in `src/game/uiState.ts`). One side effect is also the same as before: keyboard focus goes back to the top of the page after a click (except on screen changes, where focus moves to the heading). We can improve this as part of the accessibility work.
+- **One fix on purpose: the "Real record" tags.** In the original, these tags shared a CSS class name (`n`) with the round step numbers on the briefing screen. That squeezed each tag into a small box, so its text overlapped the words next to it. The step numbers now use their own class (`step-num`), so the tags display on one line like the "Game rule" tag. This is the only visible change from the original.
+- **Pip's arms are drawn with thin lines.** The original code asked for thicker arm lines, but the way it was written meant the browser ignored that. We kept the look the game actually had.
 
 ## 👥 Working as a team
 

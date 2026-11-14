@@ -1,0 +1,58 @@
+/* Gadget-selection cards.
+   Copied from the original index.html stylesheet (see legacy/index.html). */
+
+.gad {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    margin: 24px 0
+}
+
+.gad button {
+    display: block;
+    width: 100%;
+    background: var(--moon);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 0 7px 0 var(--ink);
+    padding: 16px;
+    position: relative;
+    transition: transform .15s
+}
+
+.gad button:nth-child(odd) {
+    transform: rotate(-1.5deg)
+}
+
+.gad button:nth-child(even) {
+    transform: rotate(1.5deg)
+}
+
+.gad button:hover {
+    transform: translateY(-4px) rotate(0)
+}
+
+.gad button[aria-pressed=true] {
+    background: var(--mint);
+    animation: pop .5s both
+}
+
+.gad button[aria-pressed=true]::after {
+    content: "PICKED!";
+    position: absolute;
+    top: -14px;
+    right: -8px;
+    background: var(--sun);
+    border: 3px solid var(--ink);
+    border-radius: 12px;
+    padding: 0 10px;
+    font-family: var(--d);
+    transform: rotate(8deg)
+}
+
+.gad small {
+    display: block;
+    font-size: .95rem;
+    margin-top: 6px
+}

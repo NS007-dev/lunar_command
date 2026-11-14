@@ -1,0 +1,101 @@
+/* Welcome and briefing screens: hero, tags, Pip's speech bubble, step cards.
+   Copied from the original index.html stylesheet (see legacy/index.html). */
+
+.hero {
+    min-height: 84vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 22px
+}
+
+.tag {
+    display: inline-block;
+    background: var(--sky);
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 999px;
+    padding: 4px 16px;
+    font-family: var(--d);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 0 var(--ink);
+    transform: rotate(2deg)
+}
+
+.talk {
+    display: grid;
+    grid-template-columns: 96px 1fr;
+    gap: 14px;
+    align-items: end
+}
+
+.talk svg {
+    width: 96px;
+    height: auto;
+    animation: bob 2.4s ease-in-out infinite
+}
+
+@keyframes bob {
+    50% {
+        transform: translateY(-8px) rotate(2deg)
+    }
+}
+
+.say {
+    position: relative;
+    background: #fff;
+    color: var(--ink);
+    border: 3px solid var(--ink);
+    border-radius: 14px;
+    padding: 14px 18px;
+    box-shadow: 0 6px 0 var(--ink);
+    font-weight: 700
+}
+
+.say::before {
+    content: "";
+    position: absolute;
+    left: -16px;
+    bottom: 22px;
+    width: 24px;
+    height: 24px;
+    background: #fff;
+    border-left: 3px solid var(--ink);
+    border-bottom: 3px solid var(--ink);
+    transform: rotate(45deg)
+}
+
+.steps {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin: 22px 0
+}
+
+.steps .card:nth-child(1) {
+    transform: rotate(-1.5deg)
+}
+
+.steps .card:nth-child(2) {
+    transform: rotate(1.2deg);
+    background: #ffd9cf
+}
+
+.steps .card:nth-child(3) {
+    transform: rotate(-1deg);
+    background: #d3f5e8
+}
+
+/* Round step number on the briefing cards. (Was ".n" in the original, which clashed with the "tg n" Real record tags.) */
+.step-num {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--sun);
+    border: 3px solid var(--ink);
+    font-family: var(--d);
+    margin-bottom: 6px
+}
