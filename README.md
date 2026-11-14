@@ -133,6 +133,7 @@ Other commands:
 We checked that nothing from the original was lost. A script played the same 95 clicks through both versions (all three events, success, survival and critical-failure endings, hints, "What happened?", Ask Pip, replay, changing event) on a desktop screen and a phone screen. It compared every element's text, layout, colours and animations, and they matched. Things that might look surprising in the code:
 
 - **The screen is redrawn from scratch after every click.** The original rebuilt the whole page each time, so its pop, shake and flash animations replayed after every click. The React version does the same on purpose (see `renderId` in `src/game/uiState.ts`). One side effect is also the same as before: keyboard focus goes back to the top of the page after a click (except on screen changes, where focus moves to the heading). We can improve this as part of the accessibility work.
+- **One fix on purpose: the "Real record" tags.** In the original, these tags shared a CSS class name (`n`) with the round step numbers on the briefing screen. That squeezed each tag into a small box, so its text overlapped the words next to it. The step numbers now use their own class (`step-num`), so the tags display on one line like the "Game rule" tag. This is the only visible change from the original.
 - **Pip's arms are drawn with thin lines.** The original code asked for thicker arm lines, but the way it was written meant the browser ignored that. We kept the look the game actually had.
 
 ## 👥 Working as a team

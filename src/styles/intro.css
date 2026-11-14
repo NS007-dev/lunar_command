@@ -87,7 +87,8 @@
     background: #d3f5e8
 }
 
-.n {
+/* Round step number on the briefing cards. (Was ".n" in the original, which clashed with the "tg n" Real record tags.) */
+.step-num {
     display: inline-grid;
     place-items: center;
     width: 42px;
