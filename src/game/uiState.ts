@@ -1,6 +1,6 @@
 /* Screen/UI state and how each button changes it. Pure (no React), so it is easy to test. */
 import { check, init, step } from './engine';
-import { explain, hint, reason } from './mentor';
+import { hint, previewText, reason, reportText, shiftReport, stormNews, type ShiftReport } from './mentor';
 import { SCI } from '../data/scienceFacts';
 import { isGadget, isScenario, type ActionId, type Gadget } from './scenarios';
 import type { GameState } from './types';
@@ -29,11 +29,21 @@ export interface UIState {
   renderId: number;
   /** Move keyboard focus to the screen heading after this update */
   focusHeading: boolean;
+  /** Pip's report on the last shift played (kept so "What happened?" can show it again) */
+  report: ShiftReport | null;
+  /** Pip is showing `report` right now */
+  showReport: boolean;
+  /** The last button press was refused (Pip shows a warning) */
+  refused: boolean;
+  /** Text for the screen-reader live region, which stays on the page across redraws */
+  announce: string;
+  /** Bumped on every announcement, so the same words are read again if they repeat */
+  announceN: number;
 }
 
 export const initialUI: UIState = {
   screen: 'launch', sc: 0, sel: [], pending: null, resolving: false, mentor: '', prev: null, tx: false, game: null,
-  renderId: 0, focusHeading: false,
+  renderId: 0, focusHeading: false, report: null, showReport: false, refused: false, announce: '', announceN: 0,
 };
 
 export type UIAction =
@@ -50,9 +60,11 @@ export type UIAction =
   | { type: 'hint' }
   | { type: 'expl' }
   | { type: 'sq'; k: number }
+  /** "See your results": leaves the finished mission for the debrief */
+  | { type: 'results' }
   | { type: 'replay' };
 
-const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'launch', 'replay']);
+const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'launch', 'results', 'replay']);
 
 /**
  * The screens each button exists on. A button sent from any other screen is ignored, so it can never
@@ -61,8 +73,11 @@ const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'la
 const SCREENS: Record<UIAction['type'], readonly Screen[]> = {
   'go-brief': ['launch'], 'go-event': ['brief', 'prep', 'debrief'], ev: ['event'], up: ['prep'], launch: ['prep'],
   pick: ['mission'], cancel: ['mission'], confirm: ['mission'], resolve: ['mission'], hint: ['mission'], expl: ['mission'], sq: ['mission'],
-  replay: ['debrief'],
+  results: ['mission'], replay: ['debrief'],
 };
+
+/** What "What happened?" says before the first shift. */
+export const NOTHING_YET = 'Nothing has happened yet. Pick a job for your first shift!';
 
 /** How many gadgets a mission takes. */
 export const GADGETS = 2;
@@ -86,6 +101,13 @@ function refuse(ui: UIState, mentor: string, extra: Partial<UIState> = {}): UISt
   return r;
 }
 
+/** Sets what the screen-reader live region reads out. */
+function say(next: UIState, ui: UIState, text: string): UIState {
+  next.announce = text;
+  next.announceN = ui.announceN + 1;
+  return next;
+}
+
 function apply(ui: UIState, a: UIAction): UIState | null {
   const G = ui.game;
   // While a confirmed shift is playing out (the short pause after "Do it!"), ignore every button
@@ -107,20 +129,22 @@ function apply(ui: UIState, a: UIAction): UIState | null {
     }
     case 'launch': {
       const r = init(ui.sc, ui.sel);
-      if (r.ok) return { ...ui, game: r.state, screen: 'mission', pending: null, mentor: '', prev: null };
+      if (r.ok) return { ...ui, game: r.state, screen: 'mission', pending: null, mentor: '', prev: null, report: null, showReport: false };
       return refuse(ui, launchError(ui.sel, r.error));
     }
     case 'pick': {
       if (!G) return null;
       // Unavailable jobs never reach the "Do it!" step: Pip explains why instead.
       const c = check(G, a.k);
-      return c.ok ? { ...ui, pending: a.k, mentor: '' } : refuse(ui, reason(c.error, G), { pending: null });
+      return c.ok
+        ? say({ ...ui, pending: a.k, mentor: '', showReport: false }, ui, previewText(G, a.k))
+        : say(refuse(ui, reason(c.error, G), { pending: null, showReport: false }), ui, reason(c.error, G));
     }
     case 'cancel': return { ...ui, pending: null };
     case 'confirm': {
       if (!G || !ui.pending) return null;
       const c = check(G, ui.pending);
-      if (!c.ok) return refuse(ui, reason(c.error, G), { pending: null });
+      if (!c.ok) return say(refuse(ui, reason(c.error, G), { pending: null, showReport: false }), ui, reason(c.error, G));
       return { ...ui, resolving: true };
     }
     case 'resolve': {
@@ -130,17 +154,27 @@ function apply(ui: UIState, a: UIAction): UIState | null {
       const before = G.power, r = step(G, ui.pending);
       const next: UIState = { ...ui, resolving: false, pending: null };
       if (r.ok) {
-        next.prev = before; next.game = r.state; next.tx = true; next.mentor = explain(r.state);
-        if (r.state.ended) next.screen = 'debrief';
-      } else next.mentor = reason(r.error, G);
-      return next;
+        // The mission screen stays up after the last shift, so its report can be read before the results.
+        const rep = shiftReport(G, r.rec, r.state), news = stormNews(r.state);
+        next.prev = before; next.game = r.state; next.tx = true; next.mentor = ''; next.report = rep; next.showReport = true;
+        return say(next, ui, [news?.text, reportText(rep)].filter(Boolean).join(' '));
+      }
+      next.mentor = reason(r.error, G); next.showReport = false;
+      return say(next, ui, next.mentor);
     }
-    case 'hint': return G ? { ...ui, pending: null, mentor: hint(G) } : null;
-    case 'expl': return G ? { ...ui, pending: null, mentor: explain(G) } : null;
+    case 'hint': return G ? say({ ...ui, pending: null, mentor: hint(G), showReport: false }, ui, hint(G)) : null;
+    case 'expl':
+      if (!G) return null;
+      return ui.report
+        ? say({ ...ui, pending: null, mentor: '', showReport: true }, ui, reportText(ui.report))
+        : say({ ...ui, pending: null, mentor: NOTHING_YET, showReport: false }, ui, NOTHING_YET);
     case 'sq':
       if (!Number.isInteger(a.k) || !SCI[a.k]) return null;
-      return { ...ui, pending: null, mentor: SCI[a.k].a };
-    case 'replay': return { ...ui, game: null, sel: [], screen: 'prep', pending: null, mentor: '', prev: null };
+      return say({ ...ui, pending: null, mentor: SCI[a.k].a, showReport: false }, ui, SCI[a.k].a);
+    case 'results':
+      if (!G?.ended) return null;
+      return { ...ui, screen: 'debrief', pending: null, mentor: '', announce: '' };
+    case 'replay': return { ...ui, game: null, sel: [], screen: 'prep', pending: null, mentor: '', prev: null, report: null, showReport: false };
   }
   return null;
 }
@@ -151,7 +185,8 @@ export function uiReducer(ui: UIState, a: UIAction): UIState {
   if (!next) return ui;
   // Matches the original: "tx" only lasts for the render right after a shift resolves.
   if (a.type !== 'resolve') next.tx = false;
-  if (refusals.has(next)) { next.focusHeading = false; return next; }
+  next.refused = refusals.has(next);
+  if (next.refused) { next.focusHeading = false; return next; }
   next.renderId = ui.renderId + 1;
   next.focusHeading = FOCUS_AFTER.has(a.type);
   return next;

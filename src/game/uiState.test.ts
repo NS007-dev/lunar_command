@@ -1,7 +1,7 @@
 /** Screen-state tests: buttons must not be able to break a mission. */
 import { describe, expect, it } from 'vitest';
 import { step } from './engine';
-import { explain, hint, kidErr } from './mentor';
+import { hint, kidErr, reportText } from './mentor';
 import { initialUI, uiReducer, type UIAction, type UIState } from './uiState';
 import { SC } from './scenarios';
 
@@ -64,8 +64,9 @@ describe('confirming a shift', () => {
 describe('end of the mission and replay', () => {
   const finished = () => {
     let u = ready();
-    for (let i = 0; i < 12 && u.screen === 'mission'; i++) u = run([{ type: 'pick', k: 'rest' }, { type: 'confirm' }, { type: 'resolve' }], u);
-    return u;
+    for (let i = 0; i < 12 && !u.game?.ended; i++) u = run([{ type: 'pick', k: 'rest' }, { type: 'confirm' }, { type: 'resolve' }], u);
+    // Issue #4: the last shift's report stays on the mission screen until "See your results".
+    return uiReducer(u, { type: 'results' });
   };
   it('a finished mission shows the debrief', () => {
     const u = finished();
@@ -84,10 +85,11 @@ describe('end of the mission and replay', () => {
 describe("Pip's words", () => {
   it('"What happened?" quotes the real numbers from the record', () => {
     const u = run([{ type: 'pick', k: 'shelter' }, { type: 'confirm' }, { type: 'resolve' }], ready());
-    const h = u.game!.history[0], text = explain(u.game!);
-    expect(text).toContain(`Battery ${h.powerStart} → ${h.powerEnd}`);
+    const h = u.game!.history[0], text = reportText(u.report!);
+    expect(text).toContain(`Power ${h.powerStart} → ${h.powerEnd}`);
     expect(text).toContain(`Crew supplies ${h.lifeStart} → ${h.lifeEnd}`);
-    expect(u.mentor).toBe(text);
+    const again = uiReducer(uiReducer(u, { type: 'hint' }), { type: 'expl' });
+    expect([again.showReport, again.report, again.announce]).toEqual([true, u.report, text]);
   });
   it('the hint mentions the right storm shifts once Earth has replied', () => {
     const replied = run([{ type: 'pick', k: 'message' }, { type: 'confirm' }, { type: 'resolve' }], ready()).game!;

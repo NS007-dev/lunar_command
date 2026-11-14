@@ -3,14 +3,17 @@ import { HistoryBars } from '../components/HistoryBars';
 import { PipSays, type PipMood } from '../components/Pip';
 import { Sources } from '../components/Sources';
 import { EVT } from '../data/scienceFacts';
+import { failure } from '../game/mentor';
 import { K, SC, UP } from '../game/scenarios';
 import type { GameState, Outcome } from '../game/types';
 
 /** Mission debrief: outcome, score breakdown, charts and what we learned. */
 export function Results({ s, onReplay, onOtherEvent }: { s: GameState; onReplay: () => void; onOtherEvent: () => void }) {
   const o = s.outcome as Outcome, sco = s.score!, e = SC[s.sc], ex = s.exposure;
+  // Why a critical mission stopped: power or supplies, with the real numbers from the last shift.
+  const lastShift = s.history[s.history.length - 1], f = o === 'critical' && lastShift && !lastShift.safe ? failure(lastShift) : null;
   const T: Record<Outcome, [string, string, string, PipMood]> = {
-    critical: ['Critical failure', 'Oh no! The base could not keep going', `The crew could not keep going, so the mission stopped. That is okay! Look at the bars, then try a different plan.`, 'worried'],
+    critical: ['Critical failure', f ? f.title : 'Oh no! The base could not keep going', `${f ? f.detail : 'The crew could not keep going, so the mission stopped.'} That is okay! Look at the bars, then try a different plan.`, 'worried'],
     success: ['Mission success', 'You did it, Commander!', 'The crew survived, stayed protected for the whole radiation storm, and you won the science stars. Great planning!', 'cheer'],
     survival: ex > 0
       ? ['Survival success', 'The crew survived, but not fully protected', `Everyone survived. But in ${ex} storm shift${ex > 1 ? 's' : ''}, your shelter was too weak, so the crew got extra radiation and would need a health check. Surviving and being protected are scored separately.`, 'worried']
@@ -33,7 +36,7 @@ export function Results({ s, onReplay, onOtherEvent }: { s: GameState; onReplay:
       {o === 'success' && <Confetti />}
       <span className="tag">{t[0]}</span>
       <h2 style={{ margin: '14px 0' }}>{t[1]}</h2>
-      <PipSays mood={t[3]} style={{ maxWidth: 720 }}>{t[2]}</PipSays>
+      <PipSays mood={t[3]} tone={o === 'critical' ? 'bad' : o === 'survival' && ex > 0 ? 'warn' : 'good'} style={{ maxWidth: 720 }}>{t[2]}</PipSays>
       <div className="cols">
         <div className="card">
           <h3>Score: {sco.total} out of 100</h3>

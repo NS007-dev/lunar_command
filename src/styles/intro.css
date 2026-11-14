@@ -66,6 +66,102 @@
     transform: rotate(45deg)
 }
 
+/* Bubble tones (Issue #4): good news, warning, failure. The headline words always say it too. */
+.say.good,
+.say.good::before {
+    background: #e3f8ef
+}
+
+.say.warn,
+.say.warn::before {
+    background: #fff3cc
+}
+
+.say.bad,
+.say.bad::before {
+    background: #ffe0d8
+}
+
+/* Pip's shift report: headline, sentence, what changed, then the fun fact */
+.say-h {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-family: var(--d);
+    font-weight: 600;
+    font-size: 1.3rem;
+    line-height: 1.2
+}
+
+.say-m {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid var(--ink);
+    background: var(--mint);
+    font-size: 1rem
+}
+
+.say.warn .say-m {
+    background: var(--sun)
+}
+
+.say.bad .say-m {
+    background: var(--coral)
+}
+
+.say-d,
+.say-e {
+    display: block;
+    margin-top: 6px
+}
+
+.say-e {
+    font-family: var(--d);
+    font-weight: 600
+}
+
+.say-c {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+    font-weight: 400;
+    font-size: .95rem;
+    line-height: 1.35
+}
+
+.say-c li {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    align-items: start
+}
+
+.say-c li svg {
+    width: 22px;
+    height: 22px
+}
+
+.say-c li.w {
+    color: #b3321c;
+    font-weight: 700
+}
+
+.say-f {
+    display: block;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 2px dashed #b9b4a3;
+    font-weight: 400;
+    font-size: .88rem;
+    color: #4a5070
+}
+
 .steps {
     display: grid;
     gap: 14px;
