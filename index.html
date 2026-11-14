@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Lunar Command: The Last Sunlight</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Andika:wght@400;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink: #14193a;
+            --night: #222c63;
+            --moon: #fff1cf;
+            --sun: #ffc93c;
+            --coral: #ff6a4d;
+            --mint: #4fd1a1;
+            --sky: #6ec3ff;
+            --pink: #ff9ec7;
+            --d: 'Fredoka', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif;
+            --b: 'Andika', 'Trebuchet MS', system-ui, sans-serif;
+            color-scheme: dark;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            margin: 0;
+            background: var(--night);
+            color: var(--moon);
+            font-family: var(--b);
+            font-size: 18px;
+            line-height: 1.5
+        }
+
+        #bg {
+            position: fixed;
+            inset: 0;
+            z-index: -2
+        }
+
+        #bg svg {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        #scrim {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background: var(--night);
+            opacity: .5
+        }
+
+        main {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 18px clamp(14px, 3vw, 36px) 60px
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: var(--d);
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.1
+        }
+
+        h1 {
+            font-size: clamp(3.4rem, 14vw, 9rem);
+            color: var(--sun);
+            -webkit-text-stroke: 2px var(--ink);
+            paint-order: stroke fill;
+            text-shadow: 0 6px 0 var(--ink);
+            letter-spacing: .01em;
+            transform: rotate(-3deg)
+        }
+
+        h2 {
+            font-size: clamp(2rem, 6vw, 3.4rem);
+            color: var(--sun);
+            text-shadow: 0 4px 0 var(--ink)
+        }
+
+        h3 {
+            font-size: 1.3rem
+        }
+
+        button {
+            font: inherit;
+            color: inherit;
+            background: none;
+            border: 0;
+            cursor: pointer;
+            padding: 0;
+            text-align: left
+        }
+
+        button:focus-visible {
+            outline: 4px solid var(--sky);
+            outline-offset: 3px;
+            border-radius: 16px
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--d);
+            font-size: 1.5rem;
+            background: var(--coral);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            padding: 12px 28px;
+            box-shadow: 0 7px 0 var(--ink);
+            transition: transform .12s, box-shadow .12s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 0 var(--ink)
+        }
+
+        .btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 2px 0 var(--ink)
+        }
+
+        .btn:disabled {
+            background: #8a90b5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 7px 0 var(--ink)
+        }
+
+        .btn.g {
+            background: var(--mint)
+        }
+
+        .btn.w {
+            background: var(--moon);
+            color: var(--ink);
+            -webkit-text-stroke: 0
+        }
+
+        .card {
+            background: var(--moon);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 0 7px 0 var(--ink);
+            padding: 16px 18px
+        }
+
+        .pop {
+            animation: pop .6s cubic-bezier(.3, 1.6, .5, 1) both
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: scale(.6) rotate(-6deg)
+            }
+        }
+
+        .hero {
+            min-height: 84vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 22px
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--sky);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 999px;
+            padding: 4px 16px;
+            font-family: var(--d);
+            font-size: 1.1rem;
+            box-shadow: 0 4px 0 var(--ink);
+            transform: rotate(2deg)
+        }
+
+        .talk {
+            display: grid;
+            grid-template-columns: 96px 1fr;
+            gap: 14px;
+            align-items: end
+        }
+
+        .talk svg {
+            width: 96px;
+            height: auto;
+            animation: bob 2.4s ease-in-out infinite
+        }
+
+        @keyframes bob {
+            50% {
+                transform: translateY(-8px) rotate(2deg)
+            }
+        }
+
+        .say {
+            position: relative;
+            background: #fff;
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: 0 6px 0 var(--ink);
+            font-weight: 700
+        }
+
+        .say::before {
+            content: "";
+            position: absolute;
+            left: -16px;
+            bottom: 22px;
+            width: 24px;
+            height: 24px;
+            background: #fff;
+            border-left: 3px solid var(--ink);
+            border-bottom: 3px solid var(--ink);
+            transform: rotate(45deg)
+        }
+
+        .steps {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            margin: 22px 0
+        }
+
+        .steps .card:nth-child(1) {
+            transform: rotate(-1.5deg)
+        }
+
+        .steps .card:nth-child(2) {
+            transform: rotate(1.2deg);
+            background: #ffd9cf
+        }
+
+        .steps .card:nth-child(3) {
+            transform: rotate(-1deg);
+            background: #d3f5e8
+        }
+
+        .n {
+            display: inline-grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--sun);
+            border: 3px solid var(--ink);
+            font-family: var(--d);
+            margin-bottom: 6px
+        }
+
+        .gad {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            margin: 24px 0
+        }
+
+        .gad button {
+            display: block;
+            width: 100%;
+            background: var(--moon);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 0 7px 0 var(--ink);
+            padding: 16px;
+            position: relative;
+            transition: transform .15s
+        }
+
+        .gad button:nth-child(odd) {
+            transform: rotate(-1.5deg)
+        }
+
+        .gad button:nth-child(even) {
+            transform: rotate(1.5deg)
+        }
+
+        .gad button:hover {
+            transform: translateY(-4px) rotate(0)
+        }
+
+        .gad button[aria-pressed=true] {
+            background: var(--mint);
+            animation: pop .5s both
+        }
+
+        .gad button[aria-pressed=true]::after {
+            content: "PICKED!";
+            position: absolute;
+            top: -14px;
+            right: -8px;
+            background: var(--sun);
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            padding: 0 10px;
+            font-family: var(--d);
+            transform: rotate(8deg)
+        }
+
+        .gad small {
+            display: block;
+            font-size: .95rem;
+            margin-top: 6px
+        }
+
+        .path {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+            margin: 4px 0 14px
+        }
+
+        .path i {
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid var(--ink);
+            background: var(--night);
+            color: var(--moon);
+            font: normal 1.2rem var(--d);
+            position: relative
+        }
+
+        .path i.done {
+            background: var(--mint);
+            color: var(--ink)
+        }
+
+        .path i.now {
+            background: var(--sun);
+            color: var(--ink);
+            transform: scale(1.25);
+            box-shadow: 0 4px 0 var(--ink)
+        }
+
+        .path i.bad {
+            border-color: var(--coral);
+            box-shadow: 0 0 0 3px var(--coral)
+        }
+
+        .path u {
+            text-decoration: none;
+            font-size: .7rem;
+            position: absolute;
+            bottom: -18px;
+            color: var(--coral);
+            font-family: var(--b);
+            font-weight: 700;
+            white-space: nowrap
+        }
+
+        .alert {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            background: var(--coral);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-family: var(--d);
+            font-size: 1.25rem;
+            box-shadow: 0 6px 0 var(--ink);
+            margin: 18px 0 10px;
+            animation: shake .6s both
+        }
+
+        @keyframes shake {
+            20% {
+                transform: translateX(-12px) rotate(-1deg)
+            }
+
+            40% {
+                transform: translateX(12px) rotate(1deg)
+            }
+
+            60% {
+                transform: translateX(-8px)
+            }
+
+            80% {
+                transform: translateX(6px)
+            }
+        }
+
+        .mis {
+            display: grid;
+            gap: 22px;
+            grid-template-columns: 1fr
+        }
+
+        @media(min-width:980px) {
+            .mis {
+                grid-template-columns: 7fr 5fr
+            }
+        }
+
+        .vp {
+            border: 5px solid var(--ink);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 0 var(--ink);
+            aspect-ratio: 2/1.02;
+            background: var(--night)
+        }
+
+        .vp svg {
+            width: 100%;
+            height: 100%;
+            display: block
+        }
+
+        .tx .vp {
+            animation: wob .6s both
+        }
+
+        @keyframes wob {
+            30% {
+                transform: scale(.985)
+            }
+
+            60% {
+                transform: scale(1.01)
+            }
+        }
+
+        .stats {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(3, 1fr);
+            margin-top: 20px
+        }
+
+        .stats .wide {
+            grid-column: 1/-1
+        }
+
+        .stat {
+            background: var(--moon);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            padding: 10px 14px;
+            box-shadow: 0 5px 0 var(--ink)
+        }
+
+        .stat b {
+            font-family: var(--d);
+            font-weight: 400;
+            font-size: 2.2rem;
+            line-height: 1
+        }
+
+        .stat span.l {
+            display: block;
+            font-weight: 700;
+            font-size: .85rem
+        }
+
+        .stat.s1 {
+            transform: rotate(-1deg);
+            background: #ffe9a8
+        }
+
+        .stat.s2 {
+            transform: rotate(1deg);
+            background: #cdeeff
+        }
+
+        .stat.s3 {
+            transform: rotate(-.6deg);
+            background: #ffd9e8
+        }
+
+        .stat .ro {
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .stat svg.i {
+            width: 34px;
+            height: 34px;
+            flex: none
+        }
+
+        .cells {
+            display: flex;
+            gap: 3px;
+            height: 34px;
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            padding: 3px;
+            background: #fff;
+            position: relative;
+            margin-top: 8px
+        }
+
+        .cells::after {
+            content: "";
+            position: absolute;
+            right: -12px;
+            top: 8px;
+            width: 8px;
+            height: 12px;
+            background: var(--ink);
+            border-radius: 0 4px 4px 0
+        }
+
+        .cells i {
+            flex: 1;
+            background: #e3e1d6;
+            border-radius: 3px
+        }
+
+        .cells i.on {
+            background: var(--mint)
+        }
+
+        .cells i.lo {
+            background: var(--coral)
+        }
+
+        .cells i.chg {
+            animation: cp .7s ease both
+        }
+
+        @keyframes cp {
+            0% {
+                background: var(--sun);
+                transform: scaleY(1.5)
+            }
+        }
+
+        .cells i.gl {
+            background: none;
+            outline: 2px dashed var(--coral);
+            outline-offset: -2px
+        }
+
+        .cells i.gb {
+            background: none;
+            outline: 2px dashed #1b9c70;
+            outline-offset: -2px
+        }
+
+        .stars {
+            display: flex;
+            gap: 2px;
+            margin-top: 6px
+        }
+
+        .stars svg {
+            width: 26px;
+            height: 26px
+        }
+
+        .stars svg.new {
+            animation: pop .6s both
+        }
+
+        .acts {
+            display: grid;
+            gap: 12px;
+            margin: 14px 0
+        }
+
+        .act {
+            display: grid;
+            grid-template-columns: 56px 1fr auto;
+            gap: 12px;
+            align-items: center;
+            width: 100%;
+            background: var(--moon);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 0 6px 0 var(--ink);
+            padding: 10px 14px;
+            transition: transform .12s
+        }
+
+        .act:not(:disabled):hover {
+            transform: translateY(-3px) rotate(-.6deg)
+        }
+
+        .act:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            background: #cfcab9
+        }
+
+        .act[aria-pressed=true] {
+            background: var(--sun);
+            transform: translateX(8px)
+        }
+
+        .act h3 {
+            font-size: 1.2rem
+        }
+
+        .act small {
+            display: block;
+            font-size: .88rem;
+            line-height: 1.3
+        }
+
+        .act .c {
+            font-family: var(--d);
+            font-size: 1.4rem;
+            text-align: right
+        }
+
+        .act .c small {
+            font-family: var(--b);
+            font-weight: 700
+        }
+
+        .act svg {
+            width: 50px;
+            height: 50px
+        }
+
+        .act .why {
+            color: #b3321c;
+            font-weight: 700
+        }
+
+        .dots {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0
+        }
+
+        .bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            height: 150px;
+            border-bottom: 3px solid var(--ink);
+            padding: 0 6px
+        }
+
+        .bars div {
+            flex: 1;
+            text-align: center;
+            font-family: var(--d)
+        }
+
+        .bars i {
+            display: block;
+            background: var(--mint);
+            border: 3px solid var(--ink);
+            border-bottom: 0;
+            border-radius: 10px 10px 0 0;
+            margin-top: 4px;
+            animation: up .8s both
+        }
+
+        .bars i.f {
+            background: var(--coral)
+        }
+
+        @keyframes up {
+            from {
+                height: 0 !important
+            }
+        }
+
+        .lab {
+            display: flex;
+            gap: 10px;
+            padding: 0 6px;
+            font-weight: 700;
+            font-size: .8rem
+        }
+
+        .lab span {
+            flex: 1;
+            text-align: center
+        }
+
+        .score {
+            display: grid;
+            grid-template-columns: 130px 1fr 60px;
+            gap: 10px;
+            align-items: center;
+            margin: 8px 0;
+            font-weight: 700
+        }
+
+        .score .t {
+            height: 20px;
+            border: 3px solid var(--ink);
+            border-radius: 99px;
+            background: #fff;
+            overflow: hidden
+        }
+
+        .score .t i {
+            display: block;
+            height: 100%;
+            background: var(--sun);
+            animation: gr 1s both;
+            transform-origin: left
+        }
+
+        @keyframes gr {
+            from {
+                transform: scaleX(0)
+            }
+        }
+
+        .cf {
+            position: fixed;
+            top: -20px;
+            width: 12px;
+            height: 18px;
+            border: 2px solid var(--ink);
+            border-radius: 3px;
+            animation: fall linear both;
+            pointer-events: none;
+            z-index: 5
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg)
+            }
+        }
+
+        .cols {
+            display: grid;
+            gap: 22px;
+            grid-template-columns: 1fr;
+            margin-top: 26px
+        }
+
+        @media(min-width:900px) {
+            .cols {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        a {
+            color: var(--sky);
+            font-weight: 700
+        }
+
+        .lnk {
+            text-decoration: underline;
+            font-weight: 700;
+            color: var(--moon);
+            padding: 6px 0
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important
+            }
+        }
+
+        .tg {
+            display: inline-block;
+            border: 2px solid var(--ink);
+            border-radius: 8px;
+            padding: 0 8px;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-right: 8px
+        }
+
+        .tg.n {
+            background: var(--sky)
+        }
+
+        .tg.r {
+            background: var(--sun)
+        }
+
+        .tg.m {
+            background: var(--pink)
+        }
+
+        .sg {
+            display: flex;
+            gap: 3px;
+            margin: 6px 0
+        }
+
+        .sg i {
+            flex: 1;
+            height: 16px;
+            border: 2px solid var(--ink);
+            border-radius: 4px;
+            background: #e3e1d6
+        }
+
+        .sg i.on {
+            background: var(--sky)
+        }
+
+        .sg.sh i.on {
+            background: #c9c3b0
+        }
+
+        .sg i.lo {
+            background: var(--coral)
+        }
+
+        .sg i.gl {
+            background: none;
+            border: 2px dashed var(--coral)
+        }
+
+        .sg i.gb {
+            background: none;
+            border: 2px dashed #1b6aa8
+        }
+
+        .evs {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            margin: 24px 0
+        }
+
+        .evs button {
+            display: block;
+            width: 100%;
+            background: var(--moon);
+            color: var(--ink);
+            border: 3px solid var(--ink);
+            border-radius: 14px;
+            box-shadow: 0 6px 0 var(--ink);
+            padding: 16px;
+            transition: transform .15s
+        }
+
+        .evs button:hover {
+            transform: translateY(-4px)
+        }
+
+        .evs button:focus-visible {
+            outline-offset: 5px
+        }
+
+        .info {
+            display: grid;
+            gap: 8px;
+            margin: 14px 0
+        }
+
+        .info .l2 {
+            background: #141c44;
+            border: 2px solid var(--moon);
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: .95rem
+        }
+
+        .path i {
+            width: 36px;
+            height: 36px;
+            font-size: 1rem
+        }
+
+        .path i.st {
+            border-color: var(--sun);
+            box-shadow: 0 0 0 3px var(--sun)
+        }
+
+        .path {
+            margin-bottom: 22px
+        }
+
+        .path u {
+            color: var(--sun);
+            bottom: -20px
+        }
+
+        .stats .stat.wide {
+            grid-column: 1/-1
+        }
+
+        .stats {
+            grid-template-columns: repeat(3, 1fr)
+        }
+
+        @media(max-width:640px) {
+            .stats {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .bars div {
+            font-family: var(--b);
+            font-weight: 700
+        }
+
+        details summary {
+            outline-offset: 4px
+        }
+
+        .path {
+            margin: 30px 0 32px
+        }
+
+        .path s {
+            position: absolute;
+            top: -22px;
+            font: 700 .72rem var(--b);
+            color: #c4cbf2;
+            text-decoration: none;
+            white-space: nowrap
+        }
+
+        .path i.shd {
+            border-style: dashed;
+            border-color: #9aa3d6;
+            background: #1a2150
+        }
+
+        .path i.shd.done {
+            background: var(--mint)
+        }
+
+        .path i.shd.now {
+            background: var(--sun)
+        }
+
+        .evs button p {
+            font-size: .92rem
+        }
+
+        .stat .l {
+            line-height: 1.3
+        }
+    </style>
+</head>
+
+<body>
+    <div id="bg" aria-hidden="true"></div>
+    <div id="scrim"></div>
+    <main id="app"></main>
+    <script id="engine">
+        /* ===== Pure simulation engine (no DOM). Single source of truth. All numbers are made-up gameplay units. ===== */
+        const Engine = (() => {
+            const K = { shifts: 8, sun: 3, shadowSun: 2, upkeep: 2, use: 1, lifeCap: 10, shieldCap: 6, sciMax: 6, goal: 4, lifeStart: 6, growIn: 3, harvest: 4 };
+            /* REAL records (NOAA SWPC): date, s = NOAA radiation-storm (S) level, flare = X-ray flare class (shown for context only; the engine NEVER reads it).
+               GAME choices: at/len (which shifts the storm covers), req (shelter points needed), shadow (hill-shadow shifts). */
+            const SC = [
+                { id: 'mar24', name: 'The March 2024 storm', date: 'March 23, 2024', s: 2, flare: 'X1.1', at: 5, len: 2, req: 2, shadow: [3, 4] },
+                { id: 'sep17', name: 'The September 2017 storm', date: 'Sept. 10, 2017', s: 3, flare: 'X8.2', at: 4, len: 2, req: 3, shadow: [6, 7] },
+                { id: 'jan26', name: 'The January 2026 storm', date: 'Jan. 19, 2026', s: 4, flare: null, at: 5, len: 3, req: 4, shadow: [2, 2] }];
+            const UP = { battery: 'Big Battery', walls: 'Thick Walls Kit', lab: 'Speedy Science Lab', garden: 'Garden Lamps' };
+            const ACTS = ['science', 'recycle', 'grow', 'shelter', 'message', 'rest'];
+            const inStorm = (sc, t) => t >= sc.at && t < sc.at + sc.len;
+            const sunAt = (sc, t) => t >= sc.shadow[0] && t <= sc.shadow[1] ? K.shadowSun : K.sun;
+            function init(sc, load) {
+                if (!SC[sc]) return { ok: false, error: 'Pick a Sun event.' };
+                if (!Array.isArray(load) || load.length !== 2 || new Set(load).size !== 2 || load.some(k => !UP[k])) return { ok: false, error: 'Choose exactly two different gadgets.' };
+                const b = load.includes('battery');
+                return { ok: true, state: { sc, loadout: [...load], turn: 1, power: b ? 7 : 5, cap: b ? 14 : 10, life: K.lifeStart, shield: 0, science: 0, plant: null, msgAt: null, protectedShifts: 0, exposure: 0, history: [], ended: false, outcome: null, score: null } };
+            }
+            const known = s => s.msgAt != null && s.turn > s.msgAt;
+            function plan(s, a) {
+                const h = k => s.loadout.includes(k), t = s.turn;
+                switch (a) {
+                    case 'rest': return { cost: 0 };
+                    case 'science': if (inStorm(SC[s.sc], t)) return { error: 'Stay inside! Going outside in a radiation storm is risky.' }; if (s.science >= K.sciMax) return { error: 'You already have all the stars!' }; return { cost: h('lab') ? 1 : 2, life: -1, sci: 2 };
+                    case 'recycle': if (s.life >= K.lifeCap) return { error: 'Crew supplies are already full.' }; return { cost: 2, life: 3 };
+                    case 'grow': if (s.plant != null) return { error: 'Your garden is already growing.' }; if (t + K.growIn > K.shifts) return { error: 'Too late! Food needs 3 shifts to grow.' }; return { cost: h('garden') ? 1 : 2, life: -1, plant: t + K.growIn };
+                    case 'shelter': if (s.shield >= K.shieldCap) return { error: 'The shelter is as strong as it can be.' }; return { cost: 2, shield: h('walls') ? 3 : 2 };
+                    case 'message': if (s.msgAt != null) return { error: 'Earth already got your message.' }; return { cost: 1, msg: true };
+                }
+                return { error: 'Unknown action.' };
+            }
+            function finish(n) {
+                const sc = SC[n.sc], c = n.outcome === 'critical';
+                if (!c) n.outcome = (n.exposure === 0 && n.protectedShifts === sc.len && n.science >= K.goal) ? 'success' : 'survival';
+                const b = { survive: c ? 0 : 25, protect: 25 * n.protectedShifts / sc.len, supplies: 20 * Math.max(0, n.life) / K.lifeCap, power: 10 * Math.max(0, n.power) / n.cap, science: 20 * Math.min(n.science / K.sciMax, 1) };
+                b.total = Math.round(b.survive + b.protect + b.supplies + b.power + b.science); n.ended = true; n.score = b; return n;
+            }
+            /* Pure: preview and resolution both use this. Order: base power first, then the job, then harvest, then crew uses supplies, then the storm check. */
+            function step(s, a) {
+                if (s.ended) return { ok: false, error: 'Mission is over.' };
+                const p = plan(s, a); if (p.error) return { ok: false, error: p.error };
+                const t = s.turn, n = structuredClone(s), sc = SC[s.sc], sun = sunAt(sc, t), left = s.power + sun - K.upkeep;
+                const rec = { turn: t, action: a, powerStart: s.power, sun, upkeep: K.upkeep, cost: p.cost, powerEnd: null, lifeStart: s.life, lifeEnd: null, harvest: 0, sci: 0, shield: s.shield, storm: null, safe: true };
+                if (left < 0) { rec.safe = false; rec.why = 'power'; rec.shortfall = -left; rec.cost = 0; n.history.push(rec); n.outcome = 'critical'; return { ok: true, state: finish(n), rec }; }
+                if (left < p.cost) return { ok: false, error: `Not enough power: this costs ${p.cost} but only ${left} is left after the base is looked after.` };
+                const hv = s.plant === t ? K.harvest : 0, gain = p.life > 0 ? p.life : 0;
+                const life = Math.min(K.lifeCap, s.life + gain + hv) + (p.life < 0 ? p.life : 0) - K.use;
+                if (life <= 0 && p.life < 0) return { ok: false, error: 'Crew supplies are too low for this.' };
+                n.power = Math.min(n.cap, left - p.cost); n.life = Math.max(0, life); rec.lifeEnd = life; rec.powerEnd = n.power; rec.harvest = hv;
+                if (hv) n.plant = null; if (p.plant) n.plant = p.plant; if (p.msg) n.msgAt = t;
+                const sb = n.science; n.science = Math.min(K.sciMax, sb + (p.sci || 0)); rec.sci = n.science - sb;
+                n.shield = Math.min(K.shieldCap, s.shield + (p.shield || 0)); rec.shield = n.shield;
+                if (inStorm(sc, t)) { const ok = n.shield >= sc.req; rec.storm = { req: sc.req, shield: n.shield, ok, n: t - sc.at + 1, of: sc.len }; if (ok) n.protectedShifts++; else n.exposure++; }
+                if (life <= 0) { rec.safe = false; rec.why = 'life'; n.history.push(rec); n.outcome = 'critical'; return { ok: true, state: finish(n), rec }; }
+                n.history.push(rec);
+                if (t >= K.shifts) finish(n); else n.turn = t + 1;
+                return { ok: true, state: n, rec };
+            }
+            return { K, SC, UP, ACTS, init, known, plan, step, inStorm, sunAt };
+        })();
+    </script>
+    <script id="ui">
+        const NAME = Engine.UP;
+        const UPD = { battery: 'Holds 14 power and starts with 7.', walls: 'Each shelter job adds 3 layers instead of 2.', lab: 'Experiments cost 1 power instead of 2.', garden: 'Planting food costs 1 power instead of 2.' };
+        const ICO = { battery: 'battery', walls: 'shield', lab: 'flask', garden: 'sprout' };
+        const ACT = { science: ['Do an experiment', 'Win 2 stars. Uses power and 1 supply. Not allowed in a radiation storm: stay inside!', 'flask'], recycle: ['Recycle supplies', 'Cleans used air and water so the crew can use them again. +3 supplies.', 'recycle'], grow: ['Plant food', 'Uses power and a little water now (−1 supply). Harvest in 3 shifts: +4 supplies!', 'sprout'], shelter: ['Build storm shelter', 'Stack thick layers around the crew area. More layers block more radiation.', 'shield'], message: ['Ask Earth about the Sun', 'The Earth team studies the Sun. Their reply comes next shift.', 'radio'], rest: ['Rest', 'Costs nothing. The sun still charges the battery.', 'moon'] };
+        const FACT = { science: 'Real astronauts do experiments too. NOAA says going outside in a strong radiation storm is risky, so experiments wait.', recycle: 'Recycling cleans used air and water so crews can use them again. That means carrying less from Earth.', grow: 'Astronauts have grown plants on the International Space Station. Plants need light, water and time.', shelter: 'Thick layers between you and radiation can block some of it. Real crews move to better-protected areas in strong storms. Our shelter points are just a game way to count layers.', message: 'A radio signal from the Moon reaches Earth in about 1.3 seconds. Mars is much farther: messages take minutes. In our game the reply takes a whole shift because the Earth team needs time to study the Sun, not because of radio delay.', rest: 'Saving power is a real skill. Crews plan their energy carefully.' };
+        const EVT = { mar24: { flare: 'The Sun gave off an X1.1 flare on March 23, 2024. A flare is a flash of light and X-rays.', storm: 'After it, NOAA saw fast particles reach S2 (moderate) levels. NOAA said the storm was expected to last into the next day.' }, sep17: { flare: 'The Sun gave off an X8.2 flare on Sept. 10, 2017.', storm: 'Fast particles then reached S3 (strong) levels. NOAA data show them peaking near 1,040 pfu and staying high into the next day.' }, jan26: { flare: 'We did not use a flare for this event.', storm: 'On Jan. 19, 2026, NOAA reported an S4 (severe) radiation storm. NOAA said it was the biggest in over 20 years.' } };
+        const SLV = { 2: 'moderate', 3: 'strong', 4: 'severe' };
+        const SCI = [
+            { q: 'What is radiation?', a: 'Radiation is energy that travels through space. Some kinds, like fast tiny particles from the Sun, can harm living things. Astronauts need protection from them.' },
+            { q: 'Flare or radiation storm?', a: 'A solar flare is a flash of light and X-rays. A radiation storm is different: it is fast particles called protons. Scientists measure them separately. X is a flare grade. NOAA grades radiation storms S1 (minor) to S5 (extreme).' },
+            { q: 'Why a shelter?', a: 'Thick material between you and radiation blocks some of it. On Earth, our air and magnetic field protect us. On the Moon, crews need other protection, so real crews move to better-protected places in strong storms.' },
+            { q: 'Are the numbers real?', a: 'No! Power, supplies and shelter points are made-up game numbers. The dates and NOAA storm levels are real records. Nothing here measures a real radiation dose.' }];
+        let ui = { screen: 'launch', sc: 0, sel: [], pending: null, resolving: false, mentor: '', prev: null, tx: false }, G = null;
+        const $ = document.getElementById('app'), BG = document.getElementById('bg'), SCR = document.getElementById('scrim');
+        const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+        const O = 'stroke="#14193a" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
+        function ic(n, sz) {
+            const P = {
+                flask: `<path d="M15 5h10M17 5v11L7 33a3 3 0 0 0 3 5h20a3 3 0 0 0 3-5L23 16V5" fill="#4fd1a1" ${O}/><circle cx="17" cy="30" r="2" fill="#fff"/>`, moon: `<path d="M26 5a15 15 0 1 0 9 26A12 12 0 0 1 26 5z" fill="#ffc93c" ${O}/>`,
+                recycle: `<path d="M8 20a12 12 0 0 1 20-8M32 20a12 12 0 0 1-20 8" fill="none" ${O}/><path d="M27 5l2 8-8 1M13 35l-2-8 8-1" fill="#6ec3ff" ${O}/>`,
+                sprout: `<path d="M20 36V18" fill="none" ${O}/><path d="M20 20c-10 0-12-8-12-12 8 0 12 4 12 12z" fill="#4fd1a1" ${O}/><path d="M20 24c8 0 12-6 12-10-8 0-12 4-12 10z" fill="#4fd1a1" ${O}/>`,
+                shield: `<rect x="3" y="23" width="16" height="11" fill="#c9c3b0" ${O}/><rect x="21" y="23" width="16" height="11" fill="#c9c3b0" ${O}/><rect x="12" y="10" width="16" height="11" fill="#e0dac6" ${O}/>`,
+                radio: `<path d="M6 30a17 17 0 0 1 26-15z" fill="#6ec3ff" ${O}/><path d="M18 24l8 12M30 8l4-4" fill="none" ${O}/>`,
+                battery: `<rect x="3" y="11" width="30" height="18" rx="4" fill="#4fd1a1" ${O}/><path d="M36 17v6M12 15v10M18 15v10M24 15v10" ${O}/>`,
+                sun: `<circle cx="20" cy="20" r="8" fill="#ffc93c" ${O}/><path d="M20 3v5M20 32v5M3 20h5M32 20h5M8 8l3 3M29 29l3 3M8 32l3-3M29 11l3-3" ${O}/>`,
+                drop: `<path d="M20 4C12 16 8 21 8 27a12 12 0 0 0 24 0C32 21 28 16 20 4z" fill="#6ec3ff" ${O}/>`,
+                warn: `<path d="M20 4L37 35H3z" fill="#ffc93c" ${O}/><path d="M20 15v10M20 29v1" ${O}/>`, tick: `<path d="M6 21l9 9 19-21" fill="none" ${O}/>`
+            };
+            return `<svg viewBox="0 0 40 40" class="i" ${sz ? `style="width:${sz}px;height:${sz}px;flex:none"` : ''} aria-hidden="true">${P[n]}</svg>`;
+        }
+        function star(on, c) { return `<svg viewBox="0 0 40 40" class="${c || ''}" aria-hidden="true"><path d="M20 3l5 12h13l-10 8 4 13-12-8-12 8 4-13L2 15h13z" fill="${on ? '#ffc93c' : '#fff1cf'}" ${O} ${on ? '' : 'opacity=".5"'}/></svg>`; }
+        function pip(m) {
+            const mo = { happy: '<path d="M43 62q7 6 14 0" fill="none" ' + O + '/>', worried: '<path d="M43 66q7-6 14 0" fill="none" ' + O + '/>', cheer: '<path d="M42 60q8 12 16 0z" fill="#ff6a4d" ' + O + '/>' }[m];
+            const arms = m === 'cheer' ? `<path d="M24 94L10 68M76 94L90 68" ${O} fill="none" stroke-width="6"/>` : `<path d="M26 96L16 108M74 96L84 108" ${O} fill="none" stroke-width="6"/>`;
+            return `<svg viewBox="0 0 100 130" role="img" aria-label="Pip the robot looks ${m}">${arms}<rect x="30" y="84" width="40" height="36" rx="10" fill="#ff6a4d" ${O}/><rect x="40" y="96" width="20" height="10" rx="3" fill="#ffc93c" ${O}/><path d="M50 16V5" ${O}/><circle cx="50" cy="5" r="4" fill="${m === 'worried' ? '#ffc93c' : '#4fd1a1'}" ${O}/><rect x="16" y="16" width="68" height="66" rx="28" fill="#fff" ${O}/><rect x="25" y="29" width="50" height="40" rx="18" fill="#222c63" ${O}/><circle cx="40" cy="46" r="${m === 'cheer' ? 5 : 4}" fill="#6ec3ff"/><circle cx="60" cy="46" r="${m === 'cheer' ? 5 : 4}" fill="#6ec3ff"/>${mo}</svg>`;
+        }
+        /* Lunar world: the outpost's look is driven by the real game state (walls, garden, dish, storm). */
+        function scene(s, full) {
+            const sc = s ? Engine.SC[s.sc] : null, storm = s && !s.ended && Engine.inStorm(sc, s.turn), shade = s && !s.ended && Engine.sunAt(sc, s.turn) < Engine.K.sun;
+            let r = 11, st = ''; const rn = () => (r = (r * 1103515245 + 12345) % 2147483648) / 2147483648;
+            for (let i = 0; i < 60; i++) { const x = (rn() * 1600) | 0, y = (rn() * 420) | 0, b = rn(); st += b > .85 ? `<path d="M${x} ${y - 8}l2.5 5.5 5.5 2.5-5.5 2.5L${x} ${y + 8}l-2.5-5.5-5.5-2.5 5.5-2.5z" fill="#fff1cf" style="animation:tw ${2 + b * 2}s ease-in-out infinite alternate"/>` : `<circle cx="${x}" cy="${y}" r="${1 + b * 1.6}" fill="#fff1cf" opacity=".8"/>`; }
+            let pan = ''; for (let i = 0; i < 3; i++) { const x = 1230 + i * 130; pan += `<g transform="translate(${x} 0)"><path d="M0 548V620" stroke="#14193a" stroke-width="8"/><path d="M-54 566L52 554L62 506L-44 518Z" fill="#6ec3ff" stroke="#14193a" stroke-width="5" stroke-linejoin="round"/><path d="M-22 562L-12 512M8 559L18 509M34 556L44 506" stroke="#14193a" stroke-width="3"/></g>`; }
+            let blk = ''; if (s) for (let i = 0; i < s.shield; i++) { const c = i % 2, rw = (i / 2) | 0; blk += `<rect x="${738 + c * 48}" y="${568 - rw * 32}" width="46" height="30" rx="5" fill="${rw % 2 ? '#e0dac6' : '#c9c3b0'}" stroke="#14193a" stroke-width="4"><animate attributeName="opacity" from="0" to="1" dur=".6s"/></rect>`; }
+            let gd = ''; if (s && s.plant != null) { const left = s.plant - s.turn, h = left >= 2 ? 14 : left === 1 ? 30 : 46; gd = `<g stroke="#14193a" stroke-width="4"><path d="M1010 596v-${h}" fill="none"/><path d="M1010 ${596 - h}q-24 -6 -26 -26q22 0 26 26z" fill="#4fd1a1"/><path d="M1060 596v-${h}" fill="none"/><path d="M1060 ${596 - h}q24 -6 26 -26q-22 0 -26 26z" fill="#4fd1a1"/></g>${left <= 0 ? '<circle cx="1035" cy="548" r="9" fill="#ff6a4d" stroke="#14193a" stroke-width="4"/>' : ''}`; }
+            const waves = s && s.msgAt != null && s.turn <= s.msgAt + 1 ? `<g fill="none" stroke="#6ec3ff" stroke-width="5" stroke-linecap="round"><path d="M640 330q14-12 28 0" style="animation:tw 1s infinite alternate"/><path d="M630 312q24-22 48 0" style="animation:tw 1s .3s infinite alternate"/></g>` : '';
+            const stm = storm ? `<g stroke="#ffc93c" stroke-width="5" stroke-linecap="round" fill="none">${[0, 1, 2, 3, 4, 5, 6].map(i => `<path d="M${300 + i * 160} 0l-60 440" style="animation:sp .6s ${i * .08}s steps(2) infinite"/>`).join('')}</g>` : '';
+            return `<svg viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Cartoon Moon outpost with a dome habitat, a dish, a garden dome, a rover and solar panels. ${s ? `Shelter walls: ${s.shield}. ${s.plant != null ? 'Food is growing.' : ''}` : ''}${storm ? ' A solar storm is happening!' : ''}"><style>@keyframes tw{from{opacity:.25}to{opacity:1}}@keyframes sp{50%{opacity:0}}</style>
+ <rect width="1600" height="800" fill="#222c63"/><rect y="300" width="1600" height="200" fill="#2d3a7c" opacity=".7"/>${st}${stm}
+ <g><circle cx="230" cy="170" r="62" fill="#ffc93c" stroke="#14193a" stroke-width="5"/><g stroke="#ffc93c" stroke-width="10" stroke-linecap="round"><path d="M230 70v-28M230 270v28M130 170h-28M330 170h28M158 98l-20-20M302 242l20 20M158 242l-20 20M302 98l20-20"/></g></g>
+ <g transform="translate(1330 180)"><circle r="70" fill="#3f9be0" stroke="#14193a" stroke-width="5"/><path d="M-38-38q28-18 46 6q-12 28-38 18zM18 10q38-6 34 28q-22 22-38 4z" fill="#4fd1a1" stroke="#14193a" stroke-width="4" stroke-linejoin="round"/></g>
+ <path d="M0 560Q300 470 700 540T1600 520V800H0Z" fill="#fff1cf" stroke="#14193a" stroke-width="6"/><path d="M0 680Q500 620 1000 670T1600 650V800H0Z" fill="#f1d9a6" stroke="#14193a" stroke-width="5"/>
+ <g fill="#e8cd94" stroke="#14193a" stroke-width="4"><ellipse cx="240" cy="630" rx="120" ry="24"/><ellipse cx="1380" cy="720" rx="120" ry="22"/><ellipse cx="620" cy="735" rx="80" ry="15"/></g>
+ <g><path d="M470 560A130 130 0 0 1 730 560Z" fill="#fff" stroke="#14193a" stroke-width="6"/><path d="M470 560h260v34H470z" fill="#ff6a4d" stroke="#14193a" stroke-width="6"/><circle cx="545" cy="505" r="18" fill="#ffd9a0" stroke="#14193a" stroke-width="4"/><circle cx="655" cy="505" r="18" fill="#ffd9a0" stroke="#14193a" stroke-width="4"/><path d="M572 594v-42a28 28 0 0 1 56 0v42z" fill="#4fd1a1" stroke="#14193a" stroke-width="5"/><path d="M600 432v-72" stroke="#14193a" stroke-width="6"/><path d="M570 352q30-34 60 0z" fill="#6ec3ff" stroke="#14193a" stroke-width="5" stroke-linejoin="round"/></g>${waves}
+ <g><path d="M440 592V470" stroke="#14193a" stroke-width="6"/><path d="M443 472h56l-12 18 12 18h-56z" fill="#ff6a4d" stroke="#14193a" stroke-width="4" stroke-linejoin="round"/></g>${blk}
+ <g transform="translate(870 600)"><rect x="0" y="-30" width="80" height="30" rx="9" fill="#ffc93c" stroke="#14193a" stroke-width="5"/><rect x="34" y="-50" width="30" height="22" rx="6" fill="#6ec3ff" stroke="#14193a" stroke-width="5"/><circle cx="16" cy="6" r="13" fill="#14193a"/><circle cx="64" cy="6" r="13" fill="#14193a"/></g>
+ <g><path d="M950 600A85 85 0 0 1 1120 600Z" fill="#4fd1a1" fill-opacity=".35" stroke="#14193a" stroke-width="6"/><path d="M950 600h170" stroke="#14193a" stroke-width="6"/></g>${gd}${pan}${shade ? '<path d="M1060 500L1600 500V780H900Z" fill="#14193a" opacity=".5"/>' : ''}
+ ${full && storm ? `<g transform="translate(800 70)"><rect x="-190" y="-34" width="380" height="54" rx="12" fill="#ffc93c" stroke="#14193a" stroke-width="5"/><text y="4" text-anchor="middle" font-family="Fredoka,sans-serif" font-weight="600" font-size="30" fill="#14193a">RADIATION STORM! Stay inside!</text></g>` : ''}</svg>`;
+        }
+        function seg(cur, tot, pr, cls, low) { let c = ''; for (let i = 0; i < tot; i++) { let k = ''; if (pr != null && pr < cur && i >= pr && i < cur) k = 'gl'; else if (pr != null && pr > cur && i >= cur && i < pr) k = 'gb'; else if (i < cur) k = low && cur <= low ? 'lo' : 'on'; c += `<i class="${k}"></i>`; } return `<div class="sg ${cls || ''}" aria-hidden="true">${c}</div>`; }
+        function cells(s, pr) {
+            const cur = s.power, pv = ui.prev; let c = ''; for (let i = 1; i <= s.cap; i++) {
+                let k = '';
+                if (pr != null && pr < cur && i > pr && i <= cur) k = 'gl'; else if (pr != null && pr > cur && i > cur && i <= pr) k = 'gb';
+                else if (i <= cur) { k = cur <= Engine.K.upkeep + 1 ? 'lo' : 'on'; if (pv != null && pv < cur && i > pv) k += ' chg'; } else if (pv != null && i <= pv) k = 'chg';
+                c += `<i class="${k}"></i>`;
+            } return `<div class="cells" role="img" aria-label="Battery ${cur} of ${s.cap}">${c}</div>`;
+        }
+        function gauges(s, p) {
+            const K = Engine.K, sc = Engine.SC[s.sc], pr = p || {}, sun = Engine.sunAt(sc, s.turn); let st = ''; for (let i = 0; i < 6; i++)st += star(i < s.science, ui.tx && i < s.science && i >= s.science - 2 ? 'new' : '');
+            const arr = (a, b) => b != null && b !== a ? ` → <b>${b}</b>` : '';
+            return `<div class="stat wide"><div class="ro">${ic('battery', 34)}<span><span class="l">POWER: battery for the base</span><b>${s.power}</b> <span class="l" style="display:inline">of ${s.cap}${arr(s.power, pr.power)}</span></span></div>${cells(s, pr.power)}<span class="l" style="margin-top:6px">This shift: sun +${sun}${sun < K.sun ? ' (a hill blocks some sun)' : ''}, then the base takes −${K.upkeep}.</span></div>
+ <div class="stat s2"><div class="ro">${ic('drop', 30)}<span><span class="l">CREW SUPPLIES</span><b>${s.life}</b><span class="l" style="display:inline"> /${K.lifeCap}${arr(s.life, pr.life)}</span></span></div>${seg(s.life, K.lifeCap, pr.life, '', 2)}<span class="l">A simple mix of air, water and food. The crew uses 1 each shift.</span></div>
+ <div class="stat s1"><div class="ro">${ic('shield', 30)}<span><span class="l">CREW PROTECTION</span><b>${s.shield}</b><span class="l" style="display:inline"> layers · storm needs ${sc.req}${arr(s.shield, pr.shield)}</span></span></div>${seg(s.shield, K.shieldCap, pr.shield, 'sh')}<span class="l">Thick walls that block some radiation.</span></div>
+ <div class="stat s3"><span class="l">SCIENCE STARS ${s.science}/6 (goal ${K.goal})${arr(s.science, pr.sci)}</span><div class="stars" role="img" aria-label="${s.science} of 6 stars">${st}</div></div>`;
+        }
+        function bars(s, key, max, lab) { return `<p style="margin:10px 0 0"><b>${lab}</b></p><div class="bars" style="height:90px" role="img" aria-label="${lab} each shift: ${s.history.map(h => h[key] ?? 0).join(', ')}">${s.history.map(h => `<div style="font-size:.85rem">${h[key] ?? 0}<i class="${h.safe ? '' : 'f'}" style="height:${Math.max(3, (h[key] ?? 0) / max * 60)}px"></i></div>`).join('')}</div><div class="lab">${s.history.map(h => `<span>${h.turn}</span>`).join('')}</div>`; }
+        const kidErr = e => /Stay inside|Too late|already|full|strong|too low|already have/i.test(e) ? e : /Not enough power/.test(e) ? 'Not enough power left for this.' : 'You cannot do this now.';
+        function explain(s) {
+            const h = s.history[s.history.length - 1]; if (!h) return 'Nothing has happened yet. Pick a job for your first shift!';
+            if (!h.safe) return h.why === 'power' ? `Oh no! The base needs ${h.upkeep} power every shift to keep its systems running. You had ${h.powerStart} and the sun gave ${h.sun}, so it was ${h.shortfall} short. Plan your power before the sun gets weaker!` : `Oh no! Crew supplies ran out on shift ${h.turn}. Recycling and growing food early helps.`;
+            let t = `Shift ${h.turn}: Battery ${h.powerStart} → ${h.powerEnd} (sun +${h.sun}, base −${h.upkeep}${h.cost ? `, job −${h.cost}` : ''}). Crew supplies ${h.lifeStart} → ${h.lifeEnd}.`;
+            if (h.sun < Engine.K.sun) t += ' A hill blocked some sunlight.';
+            if (h.harvest) t += ` Your garden grew food! +${h.harvest} supplies.`; if (h.sci) t += ` +${h.sci} stars!`;
+            if (h.storm) t += h.storm.ok ? ` Radiation storm, shift ${h.storm.n} of ${h.storm.of}: your shelter (${h.storm.shield}) is enough (${h.storm.req} needed). The crew stayed protected.` : ` Radiation storm, shift ${h.storm.n} of ${h.storm.of}: your shelter was only ${h.storm.shield} and ${h.storm.req} was needed. The crew got extra radiation this shift and needs a health check.`;
+            return t + ' Fun fact: ' + FACT[h.action];
+        }
+        function hint(s) {
+            const sc = Engine.SC[s.sc], K = Engine.K, t = s.turn, k = Engine.known(s);
+            const w = k ? `The radiation storm lasts shifts ${sc.at} to ${sc.at + sc.len - 1}.` : `Fast particles may come around shifts ${sc.at - 1} to ${sc.at + sc.len}. Ask Earth to find out.`;
+            const sh = t <= sc.shadow[1] ? ` A hill's shadow cuts sun power to ${K.shadowSun} on shift ${sc.shadow[0]}${sc.shadow[1] > sc.shadow[0] ? ' to ' + sc.shadow[1] : ''}.` : '';
+            if (Engine.inStorm(sc, t)) return `A radiation storm is happening. Stay inside! Your shelter is ${s.shield} and the storm needs ${sc.req}.`;
+            if (s.life <= 3) return `Careful: crew supplies are low (${s.life}). Recycling gives +3. Food takes 3 shifts to grow. ${w}`;
+            if (s.shield < sc.req) return `${w} You need shelter ${sc.req} and you have ${s.shield}. Each shelter job costs power.${sh}`;
+            return `Your shelter is ready! ${w}${sh} What can you afford?`;
+        }
+        function srcs() {
+            const L = (u, t) => `<li><a href="${u}" target="_blank" rel="noopener">${t}</a></li>`; return `<details class="card" style="background:#cdeeff"><summary style="font-weight:700;cursor:pointer">Science &amp; sources: what is real?</summary>
+ <p><span class="tg n">Real record</span>The event dates, NOAA radiation-storm levels (S2, S3, S4) and the two flare classes (X1.1 and X8.2) are from NOAA Space Weather Prediction Center records.</p>
+ <p><span class="tg r">Game rule</span>Shelter points, which shifts the storm covers, the hill shadow, supplies, power and Pip's timing are made up for the game. We chose bigger shelter needs for higher S levels so harder storms feel harder. It is not a measurement.</p>
+ <p><span class="tg m">Made up</span>The Moon base, the crew and Pip.</p>
+ <p><b>Flare ≠ radiation storm.</b> A flare is light and X-rays (graded with letters like M and X). A radiation storm is fast protons (graded S1 to S5). They are measured differently, so a flare's X number is <b>not</b> a radiation dose. NOAA's S-levels come from satellites near Earth, not on the Moon, so they are not a dose for astronauts either.</p>
+ <ul>${L('https://www.swpc.noaa.gov/sites/default/files/images/NOAAscales.pdf', 'NOAA SWPC: Space Weather Scales (S-scale and astronaut notes)')}${L('https://www.swpc.noaa.gov/phenomena/solar-radiation-storm', 'NOAA SWPC: Solar Radiation Storm')}${L('https://www.spaceweather.gov/node/1131', 'NOAA SWPC: S1-S2 storms, March 23, 2024')}${L('https://www.spaceweather.gov/node/697', 'NOAA SWPC: X8.2 flare and S3 storm, Sept. 10, 2017')}${L('https://repository.library.noaa.gov/view/noaa/21802', 'NOAA: September 2017 space weather overview (Redmon et al., 2018)')}${L('https://watchers.news/2017/09/11/s3-strong-solar-radiation-storm-september-11-2017/', 'The Watchers (news site, reports NOAA data): 1,040 pfu peak')}${L('https://www.cp24.com/news/world/2026/01/19/sun-releases-the-largest-solar-radiation-storm-in-over-20-years-forecasters-say', 'News report quoting NOAA SWPC: S4 storm, Jan. 19, 2026')}</ul>
+ <p style="font-size:.85rem">NASA DONKI (ccmc.gsfc.nasa.gov/tools/DONKI) also catalogs particle events, but this game does not call it, so it works offline. Pip's general facts (plants on the space station, recycling, radio delay) are well-known science but are not linked to a source here.</p></details>`;
+        }
+        function evCard(e, i) { return `<button data-a="ev" data-k="${i}"><h3 style="margin:0 0 6px">${e.date}</h3><p style="margin:.3em 0"><span class="tg n">Real record</span><b>Flare:</b> ${EVT[e.id].flare}</p><p style="margin:.3em 0"><span class="tg n">Real record</span><b>Radiation storm:</b> ${EVT[e.id].storm}</p><p style="margin:.6em 0 0"><span class="tg r">Game rule</span>Shelter needed: <b>${e.req}</b> · Storm lasts <b>${e.len}</b> shift${e.len > 1 ? 's' : ''} · Hill shadow on shift ${e.shadow[0]}${e.shadow[1] > e.shadow[0] ? '–' + e.shadow[1] : ''}</p></button>`; }
+        function view() {
+            const s = G; let h = '', sc = .5, bg = scene(s && ui.screen === 'mission' ? s : null, false);
+            if (ui.screen === 'launch') { sc = 0; h = `<section class="hero"><span class="tag pop">Mission 1 · The Last Sunlight</span><h1 class="pop">LUNAR<br>COMMAND</h1><div class="talk pop" style="max-width:560px">${pip('happy')}<p class="say" style="margin:0">Hi, Commander! I'm Pip. Let's keep our Moon base safe from a space radiation storm!</p></div><button class="btn" data-a="go-brief">Start! <span aria-hidden="true">▶</span></button></section>`; }
+            else if (ui.screen === 'brief') {
+                sc = .55; h = `<section style="padding-top:4vh"><span class="tag">Your mission</span><h2 style="margin:14px 0">Commander, the Sun is acting up!</h2>
+ <div class="talk pop" style="max-width:720px">${pip('worried')}<p class="say" style="margin:0">Sometimes the Sun sends out fast, tiny particles. That is a <b>radiation storm</b>. Radiation is energy from space that can harm living things. On Earth, our air and magnetic field protect us. On the Moon, the crew needs thick walls!</p></div>
+ <div class="steps"><div class="card pop"><span class="n">1</span><h3>Power</h3><p>Sun power fills the battery. The base takes its share first. A hill's shadow will block some sun for a while.</p></div><div class="card pop"><span class="n">2</span><h3>Crew supplies</h3><p>A simple mix of air, water and food. The crew uses some every shift. Recycle and grow food!</p></div><div class="card pop"><span class="n">3</span><h3>Crew protection</h3><p>Build shelter layers before the storm. During a storm, stay inside. No experiments!</p></div></div>
+ <p>You have <b>8 shifts</b>. You can't do everything. Choose well, and win <b>4 science stars</b> too!</p><p style="font-size:.9rem;opacity:.9">Power, supplies and shelter are made-up game numbers. The storms are real NOAA records.</p>${srcs()}<p style="margin-top:20px"><button class="btn" data-a="go-event">Pick a Sun event <span aria-hidden="true">▶</span></button></p></section>`;
+            }
+            else if (ui.screen === 'event') { sc = .6; h = `<section style="padding-top:4vh"><span class="tag">Real NOAA records</span><h2 style="margin:14px 0">Which Sun event do you face?</h2><p style="max-width:60ch">Each event had a flare (a flash of light and X-rays) and a radiation storm (fast particles). They are measured separately. Higher S numbers mean stronger storms, so we made the shelter harder to build for them.</p><div class="evs">${Engine.SC.map(evCard).join('')}</div></section>`; }
+            else if (ui.screen === 'prep') {
+                const n = ui.sel.length, e = Engine.SC[ui.sc]; sc = .55; h = `<section style="padding-top:4vh"><span class="tag">${e.date} · S${e.s} ${SLV[e.s]} storm</span><h2 style="margin:14px 0">Pick exactly 2 gadgets!</h2><div class="talk" style="max-width:640px">${pip(n === 2 ? 'cheer' : 'happy')}<p class="say" style="margin:0" aria-live="polite">${n === 2 ? 'Great picks! Ready to go?' : n === 1 ? 'Nice! Pick one more.' : 'Each gadget costs 2 credits. You have 4, so you can pick 2.'}</p></div>
+ <div class="gad">${Object.keys(NAME).map(k => `<button data-a="up" data-k="${k}" aria-pressed="${ui.sel.includes(k)}"><div style="display:flex;gap:12px;align-items:center">${ic(ICO[k], 52)}<h3>${NAME[k]}</h3></div><small>${UPD[k]}</small></button>`).join('')}</div>
+ <p>Credits left: <b>${4 - 2 * n}</b> of 4</p><button class="btn g" data-a="launch" ${n === 2 ? '' : 'disabled'}>Blast off! <span aria-hidden="true">▶</span></button> &nbsp; <button class="lnk" data-a="go-event">Change event</button></section>`;
+            }
+            else if (ui.screen === 'mission') {
+                const K = Engine.K, e = Engine.SC[s.sc], t = s.turn, pend = ui.pending, pv = pend ? Engine.step(s, pend) : null, ok = pv && pv.ok && pv.rec.safe, kn = Engine.known(s), storm = Engine.inStorm(e, t), sun = Engine.sunAt(e, t), shade = sun < K.sun; sc = .65;
+                const p = ok ? { power: pv.state.power, life: pv.state.life, shield: pv.state.shield, sci: pv.state.science } : null;
+                const mood = storm || s.life <= 3 || s.power <= K.upkeep + 1 ? 'worried' : 'happy';
+                let say = ui.mentor || (storm ? 'A radiation storm is here! Fast particles from the Sun. Stay inside and check your shelter.' : shade ? "A hill's shadow is blocking some sun. Watch your battery!" : 'What should we do this shift?');
+                if (pend && pv.ok) say = pv.rec.safe ? `If you do this: battery ${pv.rec.powerStart} → ${pv.rec.powerEnd}, supplies ${pv.rec.lifeStart} → ${pv.rec.lifeEnd}, shelter ${pv.rec.shield}, stars ${pv.state.science}.${pv.rec.storm ? (pv.rec.storm.ok ? ` The storm needs ${pv.rec.storm.req} and you will have enough.` : ` The storm needs ${pv.rec.storm.req} but you would have ${pv.rec.storm.shield}. The crew would get extra radiation.`) : ''}` : `Uh oh! ${pv.rec.why === 'power' ? 'The base would be ' + pv.rec.shortfall + ' power short.' : 'Crew supplies would run out.'} The mission would end.`;
+                const path = [1, 2, 3, 4, 5, 6, 7, 8].map(x => { const win = kn ? Engine.inStorm(e, x) : (x >= e.at - 1 && x <= e.at + e.len), sh = x >= e.shadow[0] && x <= e.shadow[1]; const first = kn ? x === e.at : x === e.at - 1; return `<i class="${x < t ? 'done' : x === t ? 'now' : ''} ${win ? 'st' : ''} ${sh ? 'shd' : ''}">${x}${win && first ? `<u>${kn ? 'storm' : 'storm?'}</u>` : ''}${sh && x === e.shadow[0] ? '<s>shadow</s>' : ''}</i>`; }).join('');
+                const rad = s.protectedShifts + s.exposure === 0 ? (t > e.at + e.len - 1 ? 'Radiation storm: over.' : 'Radiation storm: not yet.') : `Radiation storm so far: ${s.protectedShifts} shift${s.protectedShifts === 1 ? '' : 's'} protected, ${s.exposure} not protected.`;
+                h = `<section class="${ui.tx ? 'tx' : ''}"><div class="path" role="img" aria-label="Shift ${t} of 8. ${kn ? 'Radiation storm on shifts ' + e.at + ' to ' + (e.at + e.len - 1) : 'Radiation storm expected around shifts ' + (e.at - 1) + ' to ' + (e.at + e.len)}. Hill shadow on shifts ${e.shadow[0]} to ${e.shadow[1]}.">${path}</div>
+ ${storm ? `<div class="alert" role="alert">${ic('warn', 32)}<span>Radiation storm now (shift ${t - e.at + 1} of ${e.len})! Crew protection needs ${e.req}. Stay inside.</span></div>` : ''}
+ <div class="mis"><div><div class="vp">${scene(s, true)}</div><div class="stats">${gauges(s, p)}</div>
+ <div class="info"><div class="l2">${rad}</div><div class="l2">Earth team: ${s.msgAt == null ? 'No message sent yet.' : kn ? `Reply: the radiation storm lasts shifts ${e.at} to ${e.at + e.len - 1}.` : 'Message sent. The team needs a shift to study the Sun.'}</div><div class="l2">Garden: ${s.plant == null ? 'Nothing planted.' : s.plant - t <= 0 ? 'Food is ready this shift!' : 'Growing. Ready in ' + (s.plant - t) + ' shifts.'}</div></div></div>
+ <div><div class="talk">${pip(pend && pv.ok && !pv.rec.safe ? 'worried' : mood)}<p class="say" style="margin:0" aria-live="polite">${esc(say)}</p></div>
+ <div class="acts">${Engine.ACTS.map(a => { const pl = Engine.plan(s, a), r = Engine.step(s, a); return `<button class="act" data-a="pick" data-k="${a}" aria-pressed="${pend === a}" ${r.ok && !ui.resolving ? '' : 'disabled'}>${ic(ACT[a][2])}<span><h3>${ACT[a][0]}</h3><small>${ACT[a][1]}</small>${r.ok ? '' : `<small class="why">${esc(kidErr(r.error))}</small>`}</span><span class="c">${pl.error ? '' : '−' + pl.cost}<small><br>power</small></span></button>` }).join('')}</div>
+ ${pend && pv.ok ? `<div class="pop"><button class="btn g" data-a="confirm" ${ui.resolving ? 'disabled' : ''}>Do it!</button> &nbsp; <button class="btn w" data-a="cancel" style="font-size:1.1rem">Wait, no</button></div>` : ''}
+ <p style="margin-top:20px"><button class="btn w" data-a="hint" style="font-size:1rem;padding:6px 16px;box-shadow:0 4px 0 var(--ink)">Hint</button> <button class="btn w" data-a="expl" style="font-size:1rem;padding:6px 16px;box-shadow:0 4px 0 var(--ink)">What happened?</button></p>
+ <p style="margin:14px 0 4px"><b>Ask Pip:</b></p>${SCI.map((x, i) => `<button class="lnk" data-a="sq" data-k="${i}" style="display:block">${x.q}</button>`).join('')}</div></div></section>`;
+            }
+            else if (ui.screen === 'debrief') {
+                const o = s.outcome, sco = s.score, e = Engine.SC[s.sc], ex = s.exposure; sc = .6;
+                const T = { critical: ['Critical failure', 'Oh no! The base could not keep going', `The crew could not keep going, so the mission stopped. That is okay! Look at the bars, then try a different plan.`, 'worried'], success: ['Mission success', 'You did it, Commander!', 'The crew survived, stayed protected for the whole radiation storm, and you won the science stars. Great planning!', 'cheer'] };
+                T.survival = ex > 0 ? ['Survival success', 'The crew survived, but not fully protected', `Everyone survived. But in ${ex} storm shift${ex > 1 ? 's' : ''}, your shelter was too weak, so the crew got extra radiation and would need a health check. Surviving and being protected are scored separately.`, 'worried'] : ['Survival success', 'The crew is safe and protected!', 'Everyone survived and stayed protected, but you did not get all 4 science stars. Try again!', 'happy'];
+                const t = T[o], g = s.history.find(x => x.action === 'grow'), sci = s.history.filter(x => x.action === 'science').length, pts = [];
+                pts.push(o === 'critical' && s.protectedShifts + ex < e.len ? 'The mission ended before the storm was over.' : ex ? `The radiation storm lasted ${e.len} shift${e.len > 1 ? 's' : ''}. Your shelter was strong enough for ${s.protectedShifts} and too weak for ${ex}. Next time start building earlier. Each shelter job costs power!` : `The storm lasted ${e.len} shift${e.len > 1 ? 's' : ''} and your shelter (${s.shield}) was strong enough every time. Great job!`);
+                pts.push('A flare is a flash of light and X-rays. A radiation storm is fast particles. They are measured separately, so a flare\'s X number is not a radiation dose.');
+                pts.push(g ? `You planted food on shift ${g.turn}. Food takes 3 shifts to grow, and then adds crew supplies.` : 'You never planted food. Growing food uses power and water now, but gives supplies later.');
+                pts.push(`A hill's shadow cut the sun on shift ${e.shadow[0]}${e.shadow[1] > e.shadow[0] ? ' to ' + e.shadow[1] : ''}. You did ${sci} experiment${sci === 1 ? '' : 's'} for ${s.science} stars. You can't do everything, so crews plan ahead!`);
+                const rows = [['Crew survived', sco.survive, 25], ['Radiation protection', sco.protect, 25], ['Crew supplies', sco.supplies, 20], ['Power left', sco.power, 10], ['Science', sco.science, 20]];
+                h = `<section style="padding-top:3vh">${o === 'success' ? confetti() : ''}<span class="tag">${t[0]}</span><h2 style="margin:14px 0">${t[1]}</h2><div class="talk" style="max-width:720px">${pip(t[3])}<p class="say" style="margin:0">${t[2]}</p></div>
+ <div class="cols"><div class="card"><h3>Score: ${sco.total} out of 100</h3>${rows.map(r => `<div class="score"><span>${r[0]}</span><span class="t"><i style="width:${r[1] / r[2] * 100}%"></i></span><span>${r[1].toFixed(r[1] % 1 ? 1 : 0)}/${r[2]}</span></div>`).join('')}<p style="margin-bottom:0">Gadgets: <b>${s.loadout.map(k => NAME[k]).join(' and ')}</b></p></div>
+ <div class="card"><h3>What happened each shift</h3>${bars(s, 'powerEnd', s.cap, 'Battery power')}${bars(s, 'lifeEnd', Engine.K.lifeCap, 'Crew supplies')}</div></div>
+ <div class="cols"><div class="card" style="background:#d3f5e8"><h3>What we learned</h3>${pts.map(p => `<p>${esc(p)}</p>`).join('')}</div><div class="card" style="background:#fff"><h3>Real record: ${e.date}</h3><p><span class="tg n">Flare</span>${EVT[e.id].flare}</p><p><span class="tg n">Storm</span>${EVT[e.id].storm}</p><p><span class="tg r">Game</span>Shelter ${e.req} and ${e.len} storm shift${e.len > 1 ? 's' : ''} are game numbers. They are not a radiation dose.</p></div></div>
+ <div style="margin-top:20px">${srcs()}</div>
+ <p style="margin-top:26px"><button class="btn" data-a="replay">Play again! <span aria-hidden="true">▶</span></button> &nbsp; <button class="btn w" data-a="go-event">Try another Sun event</button></p></section>`;
+            }
+            BG.innerHTML = bg; SCR.style.opacity = sc; $.innerHTML = h; ui.tx = false;
+        }
+        function confetti() { let h = ''; for (let i = 0; i < 24; i++)h += `<span class="cf" style="left:${(i * 41) % 100}%;animation-duration:${2.5 + (i % 5) * .6}s;animation-delay:${(i % 7) * .15}s;background:${['#ffc93c', '#ff6a4d', '#4fd1a1', '#6ec3ff', '#ff9ec7'][i % 5]}"></span>`; return h; }
+        $.addEventListener('click', e => {
+            const b = e.target.closest('button'); if (!b || b.disabled) return; const a = b.dataset.a, k = b.dataset.k;
+            if (a === 'go-brief') ui.screen = 'brief';
+            else if (a === 'go-event') { ui.screen = 'event'; G = null; }
+            else if (a === 'ev') { ui.sc = +k; ui.sel = []; ui.screen = 'prep'; }
+            else if (a === 'up') { const i = ui.sel.indexOf(k); if (i >= 0) ui.sel.splice(i, 1); else if (ui.sel.length < 2) ui.sel.push(k); }
+            else if (a === 'launch') { const r = Engine.init(ui.sc, ui.sel); if (r.ok) { G = r.state; ui.screen = 'mission'; ui.pending = null; ui.mentor = ''; ui.prev = null; } }
+            else if (a === 'pick') { ui.pending = k; ui.mentor = ''; }
+            else if (a === 'cancel') ui.pending = null;
+            else if (a === 'confirm') {
+                if (ui.resolving || !ui.pending) return; ui.resolving = true; const act = ui.pending; view();
+                setTimeout(() => { const before = G.power, r = Engine.step(G, act); ui.resolving = false; ui.pending = null; if (r.ok) { ui.prev = before; G = r.state; ui.tx = true; ui.mentor = explain(G); if (G.ended) ui.screen = 'debrief'; } else ui.mentor = kidErr(r.error); view(); }, 350); return;
+            }
+            else if (a === 'hint') { ui.pending = null; ui.mentor = hint(G); }
+            else if (a === 'expl') { ui.pending = null; ui.mentor = explain(G); }
+            else if (a === 'sq') { ui.pending = null; ui.mentor = SCI[+k].a; }
+            else if (a === 'replay') { G = null; ui.sel = []; ui.screen = 'prep'; ui.pending = null; ui.mentor = ''; ui.prev = null; }
+            view(); const h = $.querySelector('h1,h2'); if (h && ['go-brief', 'go-event', 'ev', 'launch', 'replay'].includes(a)) { h.tabIndex = -1; h.focus(); }
+        });
+        view();
+
+    </script>
+</body>
+
+</html>
