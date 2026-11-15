@@ -18,7 +18,7 @@ export const ACT: Record<ActionId, [string, string, IconName]> = {
   grow: ['Plant food', 'Uses power and a little water now (−1 supply). Ready to eat in 3 shifts: +4 supplies!', 'sprout'],
   shelter: ['Build storm shelter', 'Stack thick layers around the crew. More layers block more radiation.', 'shield'],
   message: ['Ask Earth about the Sun', 'Earth scientists will tell you exactly which shifts the radiation storm covers. Their reply comes next shift.', 'radio'],
-  rest: ['Rest', 'Costs nothing. The sun still charges the battery.', 'moon'],
+  rest: ['Rest', 'This job costs nothing. The sun still charges the battery.', 'moon'],
 };
 
 /** Pip's fun fact after each action. */

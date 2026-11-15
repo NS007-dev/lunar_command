@@ -54,7 +54,7 @@ export function Results({ s, asking = false, onRestart, onRestartYes, onRestartN
       <div className="cols">
         <div className="card">
           <h3>Score: {sco.total} out of 100</h3>
-          <p style={{ margin: '0 0 6px' }}>You win points for each part of the mission. A fuller bar means more points!</p>
+          <p style={{ margin: '0 0 6px' }}>You win points for each part of the mission. A fuller bar means more points! Crew supplies and battery power you still have at the end give extra points.</p>
           {rows.map(r => {
             const val = r[1].toFixed(r[1] % 1 ? 1 : 0);
             return (

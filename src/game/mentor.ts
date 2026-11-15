@@ -101,32 +101,24 @@ export function failure(h: ShiftRecord): { title: string; detail: string } {
 const END_OK = 'That was the last shift. Mission complete! Press "See your results" to find out how you did.';
 const END_BAD = 'The mission is over. Press "See your results" to find out what happened.';
 
-/**
- * Builds Pip's report for one shift. `before` is the game right before the shift, `rec` the engine's record of it
- * and `after` the game right after. Nothing is worked out a second way: the numbers are the record's, and what the
- * job adds is read from the engine's own plan().
- */
-export function shiftReport(before: GameState, rec: ShiftRecord, after: GameState): ShiftReport {
-  const end = after.ended ? (rec.safe ? END_OK : END_BAD) : undefined;
-  const changes: Change[] = [];
-  const shade = rec.sun < K.sun;
-  const powerLine = (): Change => {
-    const pe = rec.powerEnd ?? 0, raw = rec.powerStart + rec.sun - rec.upkeep - rec.cost, lost = raw - pe;
-    return {
-      kind: 'power',
-      text: `Battery power ${rec.powerStart} → ${pe}: ${parts([[rec.sun, shade ? "from the sun (a hill's shadow blocked some)" : 'from the sun'], [-rec.upkeep, 'to run the base'], [-rec.cost, 'for the job']])}.`
-        + (lost > 0 ? ` The battery is full (${after.cap}), so ${lost} extra power could not be stored.` : ''),
-    };
+/** "Battery power 5 → 4: +3 from the sun, −2 to run the base, −2 for the job." (plus a note when the battery is full). */
+function powerLine(rec: ShiftRecord, after: GameState): Change {
+  const pe = rec.powerEnd ?? 0, raw = rec.powerStart + rec.sun - rec.upkeep - rec.cost, lost = raw - pe, shade = rec.sun < K.sun;
+  return {
+    kind: 'power',
+    text: `Battery power ${rec.powerStart} → ${pe}: ${parts([[rec.sun, shade ? "from the sun (a hill's shadow blocked some)" : 'from the sun'], [-rec.upkeep, 'to run the base'], [-rec.cost, 'for the job']])}.`
+      + (lost > 0 ? ` The battery is full (${after.cap}), so ${lost} extra power could not be stored.` : ''),
   };
+}
 
-  if (!rec.safe) {
-    const f = failure(rec);
-    if (rec.why === 'life') changes.push(powerLine(), { kind: 'life', text: `Crew supplies ${rec.lifeStart} → 0.`, warn: true });
-    return { tone: 'bad', title: f.title, detail: f.detail, changes, end };
-  }
-
+/**
+ * What changed on a safe shift: power and supplies always, then shelter and stars when the job adds them.
+ * Pip's report after a shift and the preview before "Do it!" both use this, so they always explain a change the
+ * same way. Every number comes from the engine's shift record, and what the job adds from the engine's own plan().
+ */
+export function changeLines(before: GameState, rec: ShiftRecord, after: GameState): Change[] {
+  const changes: Change[] = [powerLine(rec, after)];
   const p = plan(before, rec.action), job = p.life ?? 0, hv = rec.harvest;
-  changes.push(powerLine());
 
   // Crew supplies: what was added is capped first, then the job and the crew use theirs (same order as the engine).
   const gain = job > 0 ? job : 0, use = job < 0 ? job : 0, lifeEnd = rec.lifeEnd ?? 0;
@@ -158,7 +150,24 @@ export function shiftReport(before: GameState, rec: ShiftRecord, after: GameStat
         + (was < K.goal && after.science >= K.goal ? ` You reached the goal of ${K.goal} stars!` : ''),
     });
   }
+  return changes;
+}
 
+/**
+ * Builds Pip's report for one shift. `before` is the game right before the shift, `rec` the engine's record of it
+ * and `after` the game right after. Nothing is worked out a second way: the numbers are the record's, and what the
+ * job adds is read from the engine's own plan().
+ */
+export function shiftReport(before: GameState, rec: ShiftRecord, after: GameState): ShiftReport {
+  const end = after.ended ? (rec.safe ? END_OK : END_BAD) : undefined;
+
+  if (!rec.safe) {
+    const f = failure(rec), changes: Change[] = [];
+    if (rec.why === 'life') changes.push(powerLine(rec, after), { kind: 'life', text: `Crew supplies ${rec.lifeStart} → 0.`, warn: true });
+    return { tone: 'bad', title: f.title, detail: f.detail, changes, end };
+  }
+
+  const changes = changeLines(before, rec, after), hv = rec.harvest, added = rec.shield - before.shield;
   if (rec.storm) {
     const st = rec.storm;
     changes.push(st.ok
@@ -207,18 +216,72 @@ export function stormNews(s: GameState): { kind: 'soon' | 'here' | 'over'; text:
   return null;
 }
 
-/** What Pip says while the player is looking at "Do it!" for job `a`. */
-export function previewText(s: GameState, a: ActionId): string {
+/** Pip's preview while the player is looking at "Do it!": the same change lines as the report after the shift. */
+export interface ShiftPreview {
+  /** The shift would end the mission */
+  bad: boolean;
+  /** "If you do this:" (or the "Uh oh!" warning) */
+  intro: string;
+  /** What would change, worded exactly like Pip's report after the shift */
+  changes: Change[];
+  /** What the storm check would say, on a storm shift */
+  storm?: string;
+  /** How to carry on (left out when the shift would end the mission) */
+  confirm?: string;
+}
+
+/** The preview for job `a`, worked out by the engine's own step() (so it is exactly what "Do it!" will do). Null if the job is refused. */
+export function shiftPreview(s: GameState, a: ActionId): ShiftPreview | null {
   const pv = step(s, a);
-  if (!pv.ok) return reason(pv.error, s);
+  if (!pv.ok) return null;
   const r = pv.rec;
-  if (!r.safe) return `Uh oh! ${r.why === 'power' ? 'The base would be ' + r.shortfall + ' power short.' : 'Crew supplies would run out.'} The mission would end.`;
+  if (!r.safe) return { bad: true, intro: `Uh oh! ${r.why === 'power' ? 'The base would be ' + r.shortfall + ' power short.' : 'Crew supplies would run out.'} The mission would end.`, changes: [] };
   const storm = r.storm
     ? (r.storm.ok
-      ? ` The storm needs ${r.storm.req} shelter layers, and you will have enough.`
-      : ` The storm needs ${r.storm.req} shelter layers, but you would only have ${r.storm.shield}. The crew would get extra radiation.`)
-    : '';
-  return `If you do this: battery power ${r.powerStart} → ${r.powerEnd}, crew supplies ${r.lifeStart} → ${r.lifeEnd}, shelter ${s_(r.shield, 'layer')}, ${s_(pv.state.science, 'star')}.${storm} ${CONFIRM}`;
+      ? `The storm needs ${r.storm.req} shelter layers, and you will have enough.`
+      : `The storm needs ${r.storm.req} shelter layers, but you would only have ${r.storm.shield}. The crew would get extra radiation.`)
+    : undefined;
+  return { bad: false, intro: 'If you do this:', changes: changeLines(s, r, pv.state), storm, confirm: CONFIRM };
+}
+
+/** What Pip says while the player is looking at "Do it!" for job `a` (also what screen readers hear). */
+export function previewText(s: GameState, a: ActionId): string {
+  const pv = step(s, a), p = shiftPreview(s, a);
+  if (!pv.ok || !p) return reason(pv.ok ? GENERIC_REFUSAL : pv.error, s);
+  return [p.intro, ...p.changes.map(c => c.text), p.storm, p.confirm].filter(Boolean).join(' ');
+}
+
+/**
+ * What a job adds or uses besides its power cost (the power cost is shown in the button's corner), for the job buttons.
+ * Read straight from the engine's plan(), so gadgets are always included. Empty when the job can't be done.
+ */
+export function effects(s: GameState, a: ActionId): string[] {
+  const p = plan(s, a);
+  if (p.error) return [];
+  const out: string[] = [];
+  if (p.life) out.push(`${signed(p.life)} ${Math.abs(p.life) === 1 ? 'supply' : 'supplies'}`);
+  if (p.plant) out.push(`+${K.harvest} supplies on shift ${p.plant}`);
+  if (p.shield) out.push(`+${s_(p.shield, 'layer')}`);
+  if (p.sci) out.push(`+${s_(p.sci, 'star')}`);
+  if (p.msg) out.push('Storm news next shift');
+  return out;
+}
+
+/** What happens every shift, whatever job is picked. */
+export const EVERY_SHIFT = `Every shift, whatever job you pick: the base uses ${K.upkeep} power and the crew uses ${K.use} ${K.use === 1 ? 'supply' : 'supplies'}.`;
+
+/** Battery power at or below this is low (the battery cells turn red). */
+export const LOW_POWER = K.upkeep + 1;
+/** Crew supplies at or below this are low (the supply bar turns red, Pip worries and the hint warns). */
+export const LOW_LIFE = 3;
+
+/** Written warnings for low resources (shown on the panels and read to screen readers). Nothing when the mission is over. */
+export function lowWarnings(s: GameState): { power?: string; life?: string } {
+  if (s.ended) return {};
+  return {
+    power: s.power <= LOW_POWER ? `Low! Battery power is only ${s.power}. Pick a cheap job, or Rest so the sun can charge the battery.` : undefined,
+    life: s.life <= LOW_LIFE ? `Low! Crew supplies are only ${s.life}. Recycle or plant food soon. If supplies reach 0, the mission stops!` : undefined,
+  };
 }
 
 /** What Pip says at the start of the first shift, before anything is picked. */
@@ -239,7 +302,7 @@ export function hint(s: GameState): string {
     ? ` On ${sc.shadow[1] > sc.shadow[0] ? `shifts ${sc.shadow[0]} to ${sc.shadow[1]}` : `shift ${sc.shadow[0]}`}, a hill's shadow means the sun only adds ${K.shadowSun} power.`
     : '';
   if (inStorm(sc, t)) return `A radiation storm is happening, so stay inside! Your shelter has ${s.shield} layers and the storm needs ${sc.req}.${s.shield >= sc.req ? ' The crew is safe.' : ' Build more shelter now!'}`;
-  if (s.life <= 3) return `Careful: crew supplies are low (${s.life}). Recycling gives +3 right away. Food takes 3 shifts to grow. ${w}`;
+  if (s.life <= LOW_LIFE) return `Careful: crew supplies are low (${s.life}). Recycling gives +3 right away. Food takes 3 shifts to grow. ${w}`;
   if (s.shield < sc.req) return `${w} The storm needs ${sc.req} shelter layers and you have ${s.shield}. Each shelter job costs power, so build before the storm comes!${sh}`;
   return `Your shelter is ready! ${w}${sh} ${s.science < K.goal ? 'Try an experiment to win science stars!' : 'Pick a job you have enough power for.'}`;
 }
