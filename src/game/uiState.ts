@@ -1,6 +1,6 @@
 /* Screen/UI state and how each button changes it. Pure (no React), so it is easy to test. */
 import { check, init, step } from './engine';
-import { hint, previewText, reason, reportText, shiftReport, stormNews, type ShiftReport } from './mentor';
+import { hint, previewText, reason, reportText, shiftReport, spoken, stormNews, type ShiftReport } from './mentor';
 import { SCI } from '../data/scienceFacts';
 import { isGadget, isScenario, type ActionId, type Gadget } from './scenarios';
 import type { GameState } from './types';
@@ -29,7 +29,7 @@ export interface UIState {
   renderId: number;
   /** Move keyboard focus to the screen heading after this update */
   focusHeading: boolean;
-  /** Pip's report on the last shift played (kept so "What happened?" can show it again) */
+  /** Pip's report on the last shift played (kept so "What just happened?" can show it again) */
   report: ShiftReport | null;
   /** Pip is showing `report` right now */
   showReport: boolean;
@@ -65,23 +65,23 @@ export type UIAction =
   | { type: 'sq'; k: number }
   /** "See your results": leaves the finished mission for the debrief */
   | { type: 'results' }
-  /** "Restart mission": Pip asks the player to confirm. Changes nothing else. */
+  /** "Play again": Pip asks the player to confirm. Changes nothing else. */
   | { type: 'restart' }
-  /** "No, go back": closes the question and keeps the results. */
+  /** "No, keep my results": closes the question and keeps the results. */
   | { type: 'restart-no' }
-  /** "Yes, restart!": throws the old mission away and goes back to choosing a Sun event. */
+  /** "Yes, new mission!": throws the old mission away and goes back to choosing a Sun event. */
   | { type: 'restart-yes' };
 
 const FOCUS_AFTER = new Set<UIAction['type']>(['go-brief', 'go-event', 'ev', 'launch', 'results', 'restart-yes']);
 
 /**
  * Opening and closing the restart question keep the Results screen as it is (no redraw), so its confetti does not
- * replay and keyboard focus can go back to the "Restart mission" button.
+ * replay and keyboard focus can go back to the "Play again" button.
  */
 const NO_REDRAW = new Set<UIAction['type']>(['restart', 'restart-no']);
 
 /** What Pip asks before a restart. */
-export const RESTART_ASK = 'Are you sure you want to start a new mission? Your current mission progress will be cleared.';
+export const RESTART_ASK = 'Do you want to start a new mission? Your score and results from this mission will go away.';
 export const RESTART_KEPT = 'Okay! Your mission results are still here.';
 
 /**
@@ -94,16 +94,18 @@ const SCREENS: Record<UIAction['type'], readonly Screen[]> = {
   results: ['mission'], restart: ['debrief'], 'restart-no': ['debrief'], 'restart-yes': ['debrief'],
 };
 
-/** What "What happened?" says before the first shift. */
+/** What "What just happened?" says before the first shift. */
 export const NOTHING_YET = 'Nothing has happened yet. Pick a job for your first shift!';
 
 /** How many gadgets a mission takes. */
 export const GADGETS = 2;
-export const TOO_MANY_GADGETS = `You can only choose ${GADGETS} gadgets. Tap one you picked to remove it, then pick a different one.`;
+/** What Pip says on the gadget screen before any gadget is picked. */
+export const PICK_HELP = `Gadgets help on your mission. You can bring ${GADGETS}! Tap a gadget to pick it. Tap it again to put it back.`;
+export const TOO_MANY_GADGETS = `You can only bring ${GADGETS} gadgets. Tap one you picked to put it back, then pick a different one.`;
 
 /** Why "Blast off!" can't start the mission yet. */
 export function launchError(sel: Gadget[], engineError: string): string {
-  if (sel.length === 0) return `Pick ${GADGETS} gadgets before blast off. You have not picked any yet.`;
+  if (sel.length === 0) return `Pick ${GADGETS} gadgets before blast off. You have not picked any yet. Tap a gadget to pick it.`;
   if (sel.length < GADGETS) return `Pick ${GADGETS - sel.length} more gadget before blast off.`;
   return engineError;
 }
@@ -119,9 +121,9 @@ function refuse(ui: UIState, mentor: string, extra: Partial<UIState> = {}): UISt
   return r;
 }
 
-/** Sets what the screen-reader live region reads out. */
+/** Sets what the screen-reader live region reads out (with "→" said as "to"). */
 function say(next: UIState, ui: UIState, text: string): UIState {
-  next.announce = text;
+  next.announce = spoken(text);
   next.announceN = ui.announceN + 1;
   return next;
 }

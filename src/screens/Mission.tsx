@@ -6,9 +6,10 @@ import { PipSays, type PipMood } from '../components/Pip';
 import { PipReport } from '../components/PipReport';
 import { ResourceDisplay, type Preview } from '../components/ResourceDisplay';
 import { ShiftPath } from '../components/ShiftPath';
+import { Spoken } from '../components/Spoken';
 import { SCI } from '../data/scienceFacts';
 import { known, step } from '../game/engine';
-import { previewText, stormNews, type ShiftReport, type Tone } from '../game/mentor';
+import { FIRST_SHIFT, NEXT_SHIFT, previewText, stormNews, type ShiftReport, type Tone } from '../game/mentor';
 import { ACTS, K, SC, inStorm, sunAt, type ActionId } from '../game/scenarios';
 import type { GameState } from '../game/types';
 
@@ -29,7 +30,9 @@ export function Mission({ s, pending, resolving, mentor, prev, tx, report, showR
   const last = tx ? s.history[s.history.length - 1] : undefined;
   const shieldWas = last ? (s.history[s.history.length - 2]?.shield ?? 0) : undefined;
 
-  let say: ReactNode = mentor || (storm ? 'A radiation storm is here! Fast particles from the Sun. Stay inside and check your shelter.' : shade ? "A hill's shadow is blocking some sun. Watch your battery!" : 'What should we do this shift?');
+  let say: ReactNode = mentor || (t === 1 ? FIRST_SHIFT
+    : storm ? 'A radiation storm is here! Tiny fast bits from the Sun are rushing past. Stay inside and check your shelter.'
+      : shade ? "A hill's shadow is blocking some sun, so your battery charges less. Watch your power!" : NEXT_SHIFT);
   let tone: Tone | undefined = refused ? 'warn' : undefined;
   let mood: PipMood = refused || storm || s.life <= 3 || s.power <= K.upkeep + 1 ? 'worried' : 'happy';
   if (pending && pv) {
@@ -46,7 +49,7 @@ export function Mission({ s, pending, resolving, mentor, prev, tx, report, showR
   const rad = seen === 0
     ? (over ? 'Radiation storm: over.' : 'Radiation storm: not yet.')
     : `Radiation storm${over ? ' is over' : ' so far'}: ${s.protectedShifts} shift${s.protectedShifts === 1 ? '' : 's'} protected, ${s.exposure} not protected.`;
-  const earth = s.msgAt == null ? 'No message sent yet.' : kn ? `Reply: the radiation storm lasts shifts ${e.at} to ${e.at + e.len - 1}.` : 'Message sent. The team needs a shift to study the Sun.';
+  const earth = s.msgAt == null ? 'No message sent yet. Ask Earth to learn when the storm comes.' : kn ? `Reply: the radiation storm covers shifts ${e.at} to ${e.at + e.len - 1}.` : 'Message sent. Earth scientists need a shift to study the Sun.';
   const garden = s.plant == null ? 'Nothing planted.' : s.plant - t <= 0 ? 'Food is ready this shift!' : 'Growing. Ready in ' + (s.plant - t) + ' shifts.';
 
   return (
@@ -70,7 +73,7 @@ export function Mission({ s, pending, resolving, mentor, prev, tx, report, showR
           </div>
         </div>
         <div>
-          <PipSays mood={mood} tone={tone}>{say}</PipSays>
+          <PipSays mood={mood} tone={tone}>{typeof say === 'string' ? <Spoken text={say} /> : say}</PipSays>
           {s.ended ? (
             <p className="pop" style={{ margin: '18px 0' }}>
               {/* After the last shift the jobs go away, and focus moves here so keyboard users can carry on. */}
@@ -89,7 +92,7 @@ export function Mission({ s, pending, resolving, mentor, prev, tx, report, showR
           </>}
           <p style={{ marginTop: 20 }}>
             {!s.ended && <><button className="btn w" onClick={onHint} style={smallBtn}>Hint</button>{' '}</>}
-            <button className="btn w" onClick={onExplain} style={smallBtn}>What happened?</button>
+            <button className="btn w" onClick={onExplain} style={smallBtn}>What just happened?</button>
           </p>
           <p style={{ margin: '14px 0 4px' }}><b>Ask Pip:</b></p>
           {SCI.map((x, i) => <button key={i} className="lnk" onClick={() => onAsk(i)} style={{ display: 'block' }}>{x.q}</button>)}

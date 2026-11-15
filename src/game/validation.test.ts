@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest';
 import { SCI } from '../data/scienceFacts';
 import { check, init, plan, step } from './engine';
-import { reason } from './mentor';
+import { GENERIC_REFUSAL, reason } from './mentor';
 import { ACTS, K, SC, UP, inStorm, type ActionId, type Gadget } from './scenarios';
 import type { GameState } from './types';
 import { TOO_MANY_GADGETS, initialUI, uiReducer, type Screen, type UIAction, type UIState } from './uiState';
@@ -152,19 +152,19 @@ describe('explanations', () => {
   it('every engine refusal gets a specific explanation, never the generic one', () => {
     for (const c of REFUSALS) {
       const text = reason(c.error, c.s);
-      expect(text, c.name).not.toBe('You cannot do this now.');
+      expect(text, c.name).not.toBe(GENERIC_REFUSAL);
       expect(text.length).toBeGreaterThan(10);
     }
   });
   it('the power explanation keeps the cost and the power left', () => {
     expect(reason('Not enough power: this costs 2 but only 1 is left after the base is looked after.'))
-      .toBe("Not enough power. This job needs 2, but after this shift's sun and the base's 2, only 1 is left.");
+      .toBe('Not enough battery power! This job needs 2. After the sun charges the battery and the base uses its 2, you will only have 1. Try a cheaper job, or Rest: it costs nothing, and the sun still charges the battery.');
   });
   it('the storm explanation says experiments wait for the storm to end', () => {
     expect(reason(REFUSALS[0].error)).toMatch(/wait until the storm is over/);
   });
   it('messages the game does not know fall back to the friendly generic sentence', () => {
-    expect(reason('Something odd')).toBe('You cannot do this now.');
+    expect(reason('Something odd')).toBe(GENERIC_REFUSAL);
   });
 });
 
@@ -243,7 +243,7 @@ describe('gadget choice', () => {
     const u = toPrep(['walls', 'garden']), r = uiReducer(u, { type: 'up', k: 'lab' });
     expect(r.sel).toEqual(['walls', 'garden']);
     expect(r.mentor).toBe(TOO_MANY_GADGETS);
-    expect(r.mentor).toMatch(/only choose 2/);
+    expect(r.mentor).toMatch(/only bring 2/);
     expect([r.renderId, r.focusHeading]).toEqual([u.renderId, false]);
   });
   it('removing a pick clears the message and lets another gadget be chosen', () => {
@@ -257,7 +257,7 @@ describe('gadget choice', () => {
   it('blast off with too few gadgets explains what is missing', () => {
     const none = uiReducer(toPrep(), { type: 'launch' }), one = uiReducer(toPrep(['lab']), { type: 'launch' });
     expect([none.screen, none.game]).toEqual(['prep', null]);
-    expect(none.mentor).toBe('Pick 2 gadgets before blast off. You have not picked any yet.');
+    expect(none.mentor).toBe('Pick 2 gadgets before blast off. You have not picked any yet. Tap a gadget to pick it.');
     expect([one.screen, one.game, one.mentor]).toEqual(['prep', null, 'Pick 1 more gadget before blast off.']);
   });
   it('the launch message is cleared on the mission screen', () => {

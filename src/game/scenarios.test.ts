@@ -17,8 +17,8 @@ import { initialUI, uiReducer, type UIAction } from './uiState';
 // Kept as literals on purpose: if a scenario's settings change, these tests say so.
 const EVENTS = [
   { k: MARCH_2024, name: 'March 23, 2024', date: 'March 23, 2024', first: 5, last: 6, len: 2, req: 2, shadow: '3 to 4', jobs: { walls: 1, plain: 1 } },
-  { k: SEPTEMBER_2017, name: 'September 10, 2017', date: 'Sept. 10, 2017', first: 4, last: 5, len: 2, req: 3, shadow: '6 to 7', jobs: { walls: 1, plain: 2 } },
-  { k: JANUARY_2026, name: 'January 19, 2026', date: 'Jan. 19, 2026', first: 5, last: 7, len: 3, req: 4, shadow: '2', jobs: { walls: 2, plain: 2 } },
+  { k: SEPTEMBER_2017, name: 'September 10, 2017', date: 'September 10, 2017', first: 4, last: 5, len: 2, req: 3, shadow: '6 to 7', jobs: { walls: 1, plain: 2 } },
+  { k: JANUARY_2026, name: 'January 19, 2026', date: 'January 19, 2026', first: 5, last: 7, len: 3, req: 4, shadow: '2', jobs: { walls: 2, plain: 2 } },
 ] as const;
 const WIN_OF = { [MARCH_2024]: WINS.mar24, [SEPTEMBER_2017]: WINS.sep17, [JANUARY_2026]: WINS.jan26 };
 
@@ -214,24 +214,26 @@ describe('storm messages for each event', () => {
     it(`${e.name}: the storm news counts ${e.len} storm shifts and names shelter ${e.req}`, () => {
       const news = replay(WIN_OF[e.k]).map(x => stormNews(x.before)?.text ?? null);
       // news[i] is what the screen shows at the start of shift i + 1
-      expect(news[e.first - 2]).toMatch(e.k === JANUARY_2026 ? `get your shelter ready (it needs ${e.req})` : `starts next shift. It needs shelter ${e.req}`);
+      expect(news[e.first - 2]).toMatch(e.k === JANUARY_2026 ? `get your shelter ready (it needs ${e.req} layers)` : `starts next shift. It needs ${e.req} shelter layers`);
       expect(news[e.first - 1]).toMatch(new RegExp(`^The radiation storm is here! Storm shift 1 of ${e.len}\\. .*the storm needs ${e.req}\\.`));
       for (let n = 2; n <= e.len; n++) expect(news[e.first + n - 2]).toMatch(new RegExp(`^The radiation storm goes on\\. Storm shift ${n} of ${e.len}\\.`));
       expect(news[e.last]).toBe(`The storm is over! The crew can go outside again, so experiments are allowed. Your shelter kept the crew safe for ${e.len} of ${e.len} storm shifts.`);
     });
     it(`${e.name}: the hint gives the storm shifts, before and after Earth replies`, () => {
       const s = { ...fresh(e.k, PLAIN), turn: 2 };
-      expect(hint(s)).toContain(`Fast particles may come around shifts ${e.first - 1} to ${e.last + 1}. Ask Earth to find out.`);
-      expect(hint({ ...s, msgAt: 1 })).toContain(`The radiation storm lasts shifts ${e.first} to ${e.last}.`);
-      expect(hint({ ...s, msgAt: 1 })).toContain(`You need shelter ${e.req} and you have 0.`);
+      expect(hint(s)).toContain(`The radiation storm may come around shifts ${e.first - 1} to ${e.last + 1}. Ask Earth to find out exactly.`);
+      expect(hint({ ...s, msgAt: 1 })).toContain(`The radiation storm covers shifts ${e.first} to ${e.last}.`);
+      expect(hint({ ...s, msgAt: 1 })).toContain(`The storm needs ${e.req} shelter layers and you have 0.`);
+      // the hill shadow is named with the right grammar ("shift 2", "shifts 3 to 4")
+      expect(hint(s)).toContain(`On shift${e.shadow.includes(' ') ? 's' : ''} ${e.shadow}, a hill's shadow means the sun only adds ${K.shadowSun} power.`);
     });
   }
   it('January 19, 2026: the storm news and shift reports use "of 3" all the way through', () => {
     const shifts = replay(WINS.jan26);
     expect(shifts.slice(4, 7).map(x => stormNews(x.before)!.text)).toEqual([
-      'The radiation storm is here! Storm shift 1 of 3. Stay inside! Your shelter is 3 and the storm needs 4. Build more shelter!',
-      'The radiation storm goes on. Storm shift 2 of 3. Stay inside! Your shelter is 6 and the storm needs 4. The crew is safe.',
-      'The radiation storm goes on. Storm shift 3 of 3. Stay inside! Your shelter is 6 and the storm needs 4. The crew is safe.',
+      'The radiation storm is here! Storm shift 1 of 3. Stay inside! Your shelter has 3 layers and the storm needs 4. Build more shelter!',
+      'The radiation storm goes on. Storm shift 2 of 3. Stay inside! Your shelter has 6 layers and the storm needs 4. The crew is safe.',
+      'The radiation storm goes on. Storm shift 3 of 3. Stay inside! Your shelter has 6 layers and the storm needs 4. The crew is safe.',
     ]);
     const stormLine = (x: (typeof shifts)[number]) => shiftReport(x.before, x.rec, x.after).changes.find(c => c.kind === 'storm')?.text;
     expect(shifts.map(stormLine).filter(Boolean)).toEqual([1, 2, 3].map(n => `Storm shift ${n} of 3: your shelter (6) was strong enough (4 needed). The crew stayed safe!`));

@@ -84,7 +84,7 @@ A simple example: if the battery starts at 5, the Sun adds 3, the base uses 2, a
 
 ## 5. The four gadgets
 
-The player has four credits and must choose exactly two different gadgets. Each gadget costs two credits.
+The player must choose exactly two different gadgets.
 
 | Gadget             | Starting battery | Battery limit | Special effect                                        |
 | ------------------ | ---------------: | ------------: | ----------------------------------------------------- |
@@ -128,8 +128,8 @@ The mission can end early if the base cannot cover its normal power use or if cr
 At the end of shift 8, the game checks the final outcome:
 
 - **Mission success:** no unprotected storm shifts, every storm shift was protected, and the player earned at least four science stars.
-- **Survival success:** the mission reached the end, but one or more of those success conditions were missed.
-- **Critical failure:** the mission stopped early because the base could not keep going.
+- **Survival success** (shown on screen as "Crew survived"): the mission reached the end, but one or more of those success conditions were missed.
+- **Critical failure** (shown on screen as "Mission stopped"): the mission stopped early because the base could not keep going.
 
 The game uses the word “survival” as a game outcome. It is not a real prediction about astronaut health.
 
