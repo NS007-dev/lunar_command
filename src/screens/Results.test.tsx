@@ -18,9 +18,9 @@ const textOf = (s: GameState) =>
 
 describe('results wording for each winning mission', () => {
   const CASES = [
-    { name: 'March 23, 2024', m: WINS.mar24, date: 'March 23, 2024', storm: 'The storm lasted 2 shifts and your shelter (2) was strong enough every time.', shadow: "A hill's shadow cut the sun on shift 3 to 4.", game: 'Shelter 2 and 2 storm shifts are game numbers.' },
-    { name: 'September 10, 2017', m: WINS.sep17, date: 'Sept. 10, 2017', storm: 'The storm lasted 2 shifts and your shelter (3) was strong enough every time.', shadow: "A hill's shadow cut the sun on shift 6 to 7.", game: 'Shelter 3 and 2 storm shifts are game numbers.' },
-    { name: 'January 19, 2026', m: WINS.jan26, date: 'Jan. 19, 2026', storm: 'The storm lasted 3 shifts and your shelter (6) was strong enough every time.', shadow: "A hill's shadow cut the sun on shift 2.", game: 'Shelter 4 and 3 storm shifts are game numbers.' },
+    { name: 'March 23, 2024', m: WINS.mar24, date: 'March 23, 2024', storm: 'The radiation storm lasted 2 shifts and your shelter (2 layers) was strong enough every time.', shadow: "A hill's shadow cut the sun on shifts 3 to 4.", game: 'Shelter needs 2 layers, and the storm lasts 2 shifts. These are made-up game numbers, not real radiation measurements.' },
+    { name: 'September 10, 2017', m: WINS.sep17, date: 'September 10, 2017', storm: 'The radiation storm lasted 2 shifts and your shelter (3 layers) was strong enough every time.', shadow: "A hill's shadow cut the sun on shifts 6 to 7.", game: 'Shelter needs 3 layers, and the storm lasts 2 shifts. These are made-up game numbers, not real radiation measurements.' },
+    { name: 'January 19, 2026', m: WINS.jan26, date: 'January 19, 2026', storm: 'The radiation storm lasted 3 shifts and your shelter (6 layers) was strong enough every time.', shadow: "A hill's shadow cut the sun on shift 2.", game: 'Shelter needs 4 layers, and the storm lasts 3 shifts. These are made-up game numbers, not real radiation measurements.' },
   ];
   for (const c of CASES) {
     it(`${c.name}: mission success, with this event's storm length, shelter, shadow and real date`, () => {
@@ -31,8 +31,8 @@ describe('results wording for each winning mission', () => {
       expect(t).toContain(c.shadow);
       expect(t).toContain(`Real record: ${c.date}`);
       expect(t).toContain(c.game);
-      expect(t).toContain('You did 2 experiments for 4 stars.');
-      expect(t).toMatch(/Radiation protection 25\/25/);
+      expect(t).toContain('You did 2 experiments for 4 science stars.');
+      expect(t).toMatch(/Safe in the storm 25\/25 25 out of 25 points/);
     });
   }
 });
@@ -40,7 +40,7 @@ describe('results wording for each winning mission', () => {
 describe('results wording when the January 2026 shelter came one shift late', () => {
   const t = textOf(play(JAN26_LATE_SHELTER));
   it('is a survival, not a success, and says 1 storm shift (singular) was too weak', () => {
-    expect(t).toContain('Survival success');
+    expect(t).toContain('Crew survived The crew survived, but not fully protected');
     expect(t).toContain('The crew survived, but not fully protected');
     expect(t).toContain('But in 1 storm shift, your shelter was too weak');
     expect(t).not.toContain('Mission success');
@@ -49,6 +49,6 @@ describe('results wording when the January 2026 shelter came one shift late', ()
     expect(t).toContain('The radiation storm lasted 3 shifts. Your shelter was strong enough for 2 and too weak for 1.');
   });
   it('shows protection as 2 of 3 storm shifts (16.7 out of 25)', () => {
-    expect(t).toMatch(/Radiation protection 16\.7\/25/);
+    expect(t).toMatch(/Safe in the storm 16\.7\/25 16\.7 out of 25 points/);
   });
 });

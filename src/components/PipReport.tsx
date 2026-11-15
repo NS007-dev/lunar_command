@@ -1,5 +1,6 @@
 import type { Change, ShiftReport } from '../game/mentor';
 import { Icon, Star, type IconName } from './Icon';
+import { Spoken } from './Spoken';
 
 const ICON: Record<Exclude<Change['kind'], 'sci'>, IconName> = { power: 'battery', life: 'drop', shield: 'shield', storm: 'warn' };
 const MARK = { good: '✓', warn: '!', bad: '✗' } as const;
@@ -17,7 +18,7 @@ export function PipReport({ r }: { r: ShiftReport }) {
         {r.changes.map((c, i) => (
           <li key={i} className={c.warn ? 'w' : undefined}>
             {c.kind === 'sci' ? <Star on /> : <Icon name={ICON[c.kind]} size={22} />}
-            <span>{c.text}</span>
+            <span><Spoken text={c.text} /></span>
           </li>
         ))}
       </ul>

@@ -74,8 +74,8 @@ export function MoonScene({ s, full, newFrom }: { s: GameState | null; full: boo
     : null;
 
   const label = 'Cartoon Moon outpost with a dome habitat, a dish, a garden dome, a rover and solar panels. '
-    + (s ? `Shelter walls: ${s.shield}. ${s.plant != null ? 'Food is growing.' : ''}` : '')
-    + (storm ? ' A solar storm is happening!' : '');
+    + (s ? `Storm shelter: ${s.shield} layer${s.shield === 1 ? '' : 's'}. ${s.plant != null ? 'Food is growing.' : ''}` : '')
+    + (storm ? ' A radiation storm is happening!' : '');
 
   return (
     <svg viewBox="0 0 1600 800" preserveAspectRatio="xMidYMid slice" role="img" aria-label={label}>

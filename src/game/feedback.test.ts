@@ -5,7 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { check, init, step } from './engine';
-import { failure, previewText, reportText, shiftReport, stormNews, type ShiftReport } from './mentor';
+import { CONFIRM, failure, previewText, reportText, shiftReport, spoken, stormNews, type ShiftReport } from './mentor';
 import { ACTS, K, SC, UP, type ActionId, type Gadget } from './scenarios';
 import type { GameState, ShiftRecord } from './types';
 import { initialUI, uiReducer, type UIAction, type UIState } from './uiState';
@@ -132,7 +132,7 @@ describe('resource changes match the shift record', () => {
 describe('caps are explained', () => {
   const g = start(0, ['lab', 'garden']);
   it('a full battery says how much extra power was lost', () => {
-    expect(line(play({ ...g, power: 10 }, 'rest').report, 'power')).toBe('Power 10 → 10: +3 from the sun, −2 to run the base. The battery is full (10), so 1 extra power could not be stored.');
+    expect(line(play({ ...g, power: 10 }, 'rest').report, 'power')).toBe('Battery power 10 → 10: +3 from the sun, −2 to run the base. The battery is full (10), so 1 extra power could not be stored.');
   });
   it('supplies can only go up to 10', () => {
     expect(line(play({ ...g, life: 9 }, 'recycle').report, 'life')).toBe('Crew supplies 9 → 9: +3 from recycling, −1 used by the crew. Supplies can only go up to 10, so 2 extra could not be stored.');
@@ -171,8 +171,14 @@ describe('storm results and failures', () => {
     const { report } = play({ ...start(0, ['lab', 'garden']), turn: K.shifts, life: 8 }, 'rest');
     expect(report.end).toMatch(/Mission complete!/);
   });
-  it('the preview text is unchanged from before', () => {
-    expect(previewText(start(0, ['lab', 'garden']), 'shelter')).toBe('If you do this: battery 5 → 4, supplies 6 → 5, shelter 2, stars 0.');
+  it('the preview names each resource and says how to carry on', () => {
+    expect(previewText(start(0, ['lab', 'garden']), 'shelter')).toBe(`If you do this: battery power 5 → 4, crew supplies 6 → 5, shelter 2 layers, 0 stars. ${CONFIRM}`);
+    expect(CONFIRM).toBe('Press "Do it!" to play this shift, or "Wait, no" to pick again.');
+  });
+  it('a storm-shift preview says whether the shelter will be enough', () => {
+    const s = { ...start(0, ['lab', 'garden']), turn: SC[0].at, life: 8 };
+    expect(previewText(s, 'rest')).toContain(`The storm needs ${SC[0].req} shelter layers, but you would only have 0. The crew would get extra radiation.`);
+    expect(previewText({ ...s, shield: SC[0].req }, 'rest')).toContain(`The storm needs ${SC[0].req} shelter layers, and you will have enough.`);
   });
 });
 
@@ -213,7 +219,10 @@ describe('feedback on the mission screen', () => {
   it('after "Do it!", Pip shows the report and the live region reads it', () => {
     const u = run(doIt('shelter'), ready());
     expect([u.showReport, u.report?.title, u.mentor]).toEqual([true, 'Shelter built! +3 layers', '']);
-    expect(u.announce).toBe(reportText(u.report!));
+    expect(u.announce).toBe(spoken(reportText(u.report!)));
+    // screen readers hear "5 to 4", not "5 right arrow 4"
+    expect(u.announce).not.toContain('→');
+    expect(u.announce).toContain('Battery power 5 to 4');
   });
   it('storm news is announced when a shift starts, and not again on other clicks', () => {
     const before = onMission({ ...start(0, ['walls', 'garden']), turn: SC[0].at - 1, life: 8 });
@@ -245,7 +254,7 @@ describe('feedback on the mission screen', () => {
     const u = ready();
     expect(uiReducer(u, { type: 'results' })).toBe(u);
   });
-  it('"What happened?" before any shift says nothing has happened yet', () => {
+  it('"What just happened?" before any shift says nothing has happened yet', () => {
     expect(uiReducer(ready(), { type: 'expl' }).mentor).toMatch(/Nothing has happened yet/);
   });
   it('playing again forgets the old report', () => {

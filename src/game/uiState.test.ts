@@ -1,7 +1,7 @@
 /** Screen-state tests: buttons must not be able to break a mission. */
 import { describe, expect, it } from 'vitest';
 import { check, init, step } from './engine';
-import { hint, kidErr, reportText } from './mentor';
+import { GENERIC_REFUSAL, hint, kidErr, reportText, spoken } from './mentor';
 import { RESTART_ASK, RESTART_KEPT, initialUI, uiReducer, type UIAction, type UIState } from './uiState';
 import { K, SC, type ActionId, type Gadget } from './scenarios';
 
@@ -79,22 +79,23 @@ describe('end of the mission', () => {
 });
 
 describe("Pip's words", () => {
-  it('"What happened?" quotes the real numbers from the record', () => {
+  it('"What just happened?" quotes the real numbers from the record', () => {
     const u = run([{ type: 'pick', k: 'shelter' }, { type: 'confirm' }, { type: 'resolve' }], ready());
     const h = u.game!.history[0], text = reportText(u.report!);
-    expect(text).toContain(`Power ${h.powerStart} → ${h.powerEnd}`);
+    expect(text).toContain(`Battery power ${h.powerStart} → ${h.powerEnd}`);
     expect(text).toContain(`Crew supplies ${h.lifeStart} → ${h.lifeEnd}`);
     const again = uiReducer(uiReducer(u, { type: 'hint' }), { type: 'expl' });
-    expect([again.showReport, again.report, again.announce]).toEqual([true, u.report, text]);
+    expect([again.showReport, again.report, again.announce]).toEqual([true, u.report, spoken(text)]);
   });
   it('the hint mentions the right storm shifts once Earth has replied', () => {
     const replied = run([{ type: 'pick', k: 'message' }, { type: 'confirm' }, { type: 'resolve' }], ready()).game!;
     expect(hint(replied)).toContain(`shifts ${SC[0].at} to ${SC[0].at + SC[0].len - 1}`);
   });
   it('every engine refusal turns into a short kid-friendly sentence', () => {
-    expect(kidErr('Not enough power: this costs 2 but only 1 is left after the base is looked after.')).toBe('Not enough power left for this.');
+    expect(kidErr('Not enough power: this costs 2 but only 1 is left after the base is looked after.')).toBe('Not enough battery power for this job. Try Rest to let the sun charge the battery.');
     expect(kidErr('Stay inside! Going outside in a radiation storm is risky.')).toContain('Stay inside');
-    expect(kidErr('Something odd')).toBe('You cannot do this now.');
+    expect(kidErr('Something odd')).toBe(GENERIC_REFUSAL);
+    expect(GENERIC_REFUSAL).toBe("You can't do this job right now. Try a different one!");
   });
 });
 
@@ -134,7 +135,7 @@ describe('restart mission (issue #5)', () => {
 
   for (const [name, end] of endings) {
     describe(`after ${name}`, () => {
-      it('"Restart mission" only asks first: the mission and results are untouched', () => {
+      it('"Play again" only asks first: the mission and results are untouched', () => {
         const d = end(), json = JSON.stringify(d.game);
         const u = uiReducer(d, { type: 'restart' });
         expect([u.screen, u.restartAsk, u.announce]).toEqual(['debrief', true, RESTART_ASK]);
@@ -144,7 +145,7 @@ describe('restart mission (issue #5)', () => {
         // the screen is not redrawn and focus is not moved to the heading
         expect([u.renderId, u.focusHeading]).toEqual([d.renderId, false]);
       });
-      it('"No, go back" closes the question and keeps the old mission exactly as it was', () => {
+      it('"No, keep my results" closes the question and keeps the old mission exactly as it was', () => {
         const d = end(), json = JSON.stringify(d.game);
         const u = run([{ type: 'restart' }, { type: 'restart-no' }], d);
         expect([u.screen, u.restartAsk, u.announce]).toEqual(['debrief', false, RESTART_KEPT]);
@@ -156,7 +157,7 @@ describe('restart mission (issue #5)', () => {
         // and the player can still ask again
         expect(uiReducer(u, { type: 'restart' }).restartAsk).toBe(true);
       });
-      it('"Yes, restart!" drops the mission, the gadgets and the old feedback, and goes to choosing a Sun event', () => {
+      it('"Yes, new mission!" drops the mission, the gadgets and the old feedback, and goes to choosing a Sun event', () => {
         const d = end();
         const u = run([{ type: 'restart' }, { type: 'restart-yes' }], d);
         expect(u.screen).toBe('event');
@@ -199,7 +200,7 @@ describe('restart mission (issue #5)', () => {
     expect(u.sel).toEqual([]);
     expect(uiReducer(u, { type: 'launch' }).screen).toBe('prep'); // can't blast off without picking again
   });
-  it('"Yes, restart!" does nothing unless Pip asked first', () => {
+  it('"Yes, new mission!" does nothing unless Pip asked first', () => {
     const d = busy();
     expect(uiReducer(d, { type: 'restart-yes' })).toBe(d);
     expect(uiReducer(d, { type: 'restart-no' })).toBe(d);

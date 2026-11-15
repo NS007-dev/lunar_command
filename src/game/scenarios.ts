@@ -39,8 +39,8 @@ export interface Scenario {
 
 export const SC: Scenario[] = [
   { id: 'mar24', name: 'The March 2024 storm', date: 'March 23, 2024', s: 2, flare: 'X1.1', at: 5, len: 2, req: 2, shadow: [3, 4] },
-  { id: 'sep17', name: 'The September 2017 storm', date: 'Sept. 10, 2017', s: 3, flare: 'X8.2', at: 4, len: 2, req: 3, shadow: [6, 7] },
-  { id: 'jan26', name: 'The January 2026 storm', date: 'Jan. 19, 2026', s: 4, flare: null, at: 5, len: 3, req: 4, shadow: [2, 2] },
+  { id: 'sep17', name: 'The September 2017 storm', date: 'September 10, 2017', s: 3, flare: 'X8.2', at: 4, len: 2, req: 3, shadow: [6, 7] },
+  { id: 'jan26', name: 'The January 2026 storm', date: 'January 19, 2026', s: 4, flare: null, at: 5, len: 3, req: 4, shadow: [2, 2] },
 ];
 
 export type Gadget = 'battery' | 'walls' | 'lab' | 'garden';

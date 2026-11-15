@@ -48,7 +48,7 @@ The current HTML version has six actions:
 
 ### Choose two gadgets
 
-Before the mission, you choose exactly two gadgets. Each one costs two credits, and you have four credits.
+Before the mission, you choose exactly two different gadgets. Tap a gadget to pick it, and tap it again to put it back.
 
 | Gadget | What it changes |
 | --- | --- |
@@ -85,8 +85,8 @@ The event records are used as inspiration for the game. The timing of the storm 
 The current game has three possible outcomes:
 
 - **Mission success:** the crew survives, stays protected during every storm shift, and earns at least four science stars.
-- **Survival success:** the mission reaches the end, but one or more success goals were missed.
-- **Critical failure:** the base cannot keep going because it runs out of the resources needed to continue.
+- **Survival success** (shown on screen as "Crew survived"): the mission reaches the end, but one or more success goals were missed.
+- **Critical failure** (shown on screen as "Mission stopped"): the base cannot keep going because it runs out of the resources needed to continue.
 
 The results screen gives a score out of 100. It looks at crew survival, storm protection, supplies left, battery power left and science progress. The exact points are explained in [`GAME_RULES.md`](GAME_RULES.md).
 

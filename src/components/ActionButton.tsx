@@ -19,7 +19,7 @@ export function ActionButton({ s, a, pressed, resolving, onPick }: {
       <Icon name={icon} />
       <span>
         <h3>{title}</h3>
-        <small>{desc}</small>
+        <small>{desc}{pl.shield ? ` +${pl.shield} layers.` : ''}</small>
         {!r.ok && <small className="why">{reason(r.error, s)}</small>}
       </span>
       <span className="c">{pl.error ? '' : '−' + pl.cost}<small><br />power</small></span>

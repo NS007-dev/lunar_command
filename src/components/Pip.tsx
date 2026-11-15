@@ -4,6 +4,9 @@ import { O } from './outline';
 
 export type PipMood = 'happy' | 'worried' | 'cheer';
 
+/** How each mood is described to screen readers ("cheer" is a noun, so it reads as "cheerful"). */
+const MOOD_WORDS: Record<PipMood, string> = { happy: 'happy', worried: 'worried', cheer: 'cheerful' };
+
 /** Pip the robot. */
 export function Pip({ mood }: { mood: PipMood }) {
   const mouth = {
@@ -18,7 +21,7 @@ export function Pip({ mood }: { mood: PipMood }) {
     : <path d="M26 96L16 108M74 96L84 108" {...O} fill="none" />;
   const eye = mood === 'cheer' ? 5 : 4;
   return (
-    <svg viewBox="0 0 100 130" role="img" aria-label={`Pip the robot looks ${mood}`}>
+    <svg viewBox="0 0 100 130" role="img" aria-label={`Pip the robot looks ${MOOD_WORDS[mood]}`}>
       {arms}
       <rect x="30" y="84" width="40" height="36" rx="10" fill="#ff6a4d" {...O} />
       <rect x="40" y="96" width="20" height="10" rx="3" fill="#ffc93c" {...O} />

@@ -89,23 +89,22 @@ describe('Results', () => {
     expect(html).toContain('On shift 2, the crew used their last supplies.');
     expect(html).toContain('class="say bad"');
   });
-  it('offers "Restart mission" and "Try another Sun event"', () => {
+  it('offers "Play again" and "Try another Sun event"', () => {
     const { after } = play({ ...start(), life: 1, turn: 2 }, 'rest');
     const html = renderToStaticMarkup(<Results s={after} onRestart={noop} onRestartYes={noop} onRestartNo={noop} onOtherEvent={noop} />);
-    expect(html).toContain('Restart mission');
+    expect(html).toContain('Play again');
     expect(html).toContain('Try another Sun event');
-    expect(html).not.toContain('Play again');
-    expect(html).not.toContain('Yes, restart!');
+    expect(html).not.toContain('Yes, new mission!');
   });
-  it('while asking, Pip asks the question with "Yes, restart!" and "No, go back" in a labelled group', () => {
+  it('while asking, Pip asks the question with "Yes, new mission!" and "No, keep my results" in a labelled group', () => {
     const { after } = play({ ...start(), life: 1, turn: 2 }, 'rest');
     const html = renderToStaticMarkup(<Results s={after} asking onRestart={noop} onRestartYes={noop} onRestartNo={noop} onOtherEvent={noop} />);
     expect(html).toContain('role="group" aria-labelledby="restart-q"');
     expect(html).toContain(`<span id="restart-q">${RESTART_ASK}</span>`);
-    expect(html).toContain('Yes, restart!');
-    expect(html).toContain('No, go back');
+    expect(html).toContain('Yes, new mission!');
+    expect(html).toContain('No, keep my results');
     expect(html).toContain('aria-label="Pip the robot looks worried"');
-    expect(html).not.toContain('Restart mission');
+    expect(html).not.toContain('Play again');
     expect(html).toContain('Score:'); // the results stay visible behind the question
   });
 });

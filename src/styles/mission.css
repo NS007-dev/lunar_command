@@ -41,7 +41,7 @@
 
 .path u {
     text-decoration: none;
-    font-size: .7rem;
+    font-size: .8rem;
     position: absolute;
     bottom: -18px;
     color: var(--coral);
@@ -172,7 +172,7 @@
 .stat span.l {
     display: block;
     font-weight: 700;
-    font-size: .85rem
+    font-size: .92rem
 }
 
 .stat.s1 {
@@ -439,7 +439,7 @@
 .path s {
     position: absolute;
     top: -22px;
-    font: 700 .72rem var(--b);
+    font: 700 .8rem var(--b);
     color: #c4cbf2;
     text-decoration: none;
     white-space: nowrap

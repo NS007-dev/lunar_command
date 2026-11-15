@@ -5,7 +5,7 @@ import type { GameState } from '../game/types';
 /** The row of 8 shift circles, with the (expected) storm and hill shadow marked. */
 export function ShiftPath({ s }: { s: GameState }) {
   const e = SC[s.sc], t = s.turn, kn = known(s);
-  const label = `Shift ${t} of 8. ${kn ? 'Radiation storm on shifts ' + e.at + ' to ' + (e.at + e.len - 1) : 'Radiation storm expected around shifts ' + (e.at - 1) + ' to ' + (e.at + e.len)}. Hill shadow on shifts ${e.shadow[0]} to ${e.shadow[1]}.`;
+  const label = `Shift ${t} of 8. ${kn ? 'Radiation storm on shifts ' + e.at + ' to ' + (e.at + e.len - 1) : 'Radiation storm expected around shifts ' + (e.at - 1) + ' to ' + (e.at + e.len)}. Hill shadow on ${e.shadow[1] > e.shadow[0] ? 'shifts ' + e.shadow[0] + ' to ' + e.shadow[1] : 'shift ' + e.shadow[0]}.`;
   return (
     <div className="path" role="img" aria-label={label}>
       {[1, 2, 3, 4, 5, 6, 7, 8].map(x => {
