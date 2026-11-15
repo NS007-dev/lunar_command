@@ -100,7 +100,7 @@ describe("Pip's words", () => {
 
 describe('restart mission (issue #5)', () => {
   const doIt = (k: ActionId): UIAction[] => [{ type: 'pick', k }, { type: 'confirm' }, { type: 'resolve' }];
-  /** A successful mission on event 2 that makes progress everywhere (science, shelter, garden, message, storm). */
+  /** A successful mission on the January 19, 2026 event (scenario index 2) that makes progress everywhere (science, shelter, garden, message, storm). Same plan as WINS.jan26 in testMissions.ts. */
   const WIN: ActionId[] = ['science', 'recycle', 'grow', 'shelter', 'shelter', 'message', 'rest', 'science'];
   const busy = (): UIState => {
     let u = ready(2);
