@@ -67,4 +67,5 @@ export const SOURCES: { url: string; text: string }[] = [
   { url: 'https://repository.library.noaa.gov/view/noaa/21802', text: 'NOAA: September 2017 space weather overview (Redmon et al., 2018)' },
   { url: 'https://watchers.news/2017/09/11/s3-strong-solar-radiation-storm-september-11-2017/', text: 'The Watchers (news site, reports NOAA data): 1,040 pfu peak' },
   { url: 'https://www.cp24.com/news/world/2026/01/19/sun-releases-the-largest-solar-radiation-storm-in-over-20-years-forecasters-say', text: 'News report quoting NOAA SWPC: S4 storm, Jan. 19, 2026' },
+  { url: 'https://www.nasa.gov/moonbase-systems/', text: 'NASA: Moon Base Systems (research on power for a Moon base)' },
 ];
