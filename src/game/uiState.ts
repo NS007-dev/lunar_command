@@ -1,6 +1,7 @@
 /* Screen/UI state and how each button changes it. Pure (no React), so it is easy to test. */
 import { check, init, step } from './engine';
-import { hint, previewText, reason, reportText, shiftReport, spoken, stormNews, type ShiftReport } from './mentor';
+import { hint, lowWarnings, previewText, reason, reportText, shiftReport, spoken, stormNews, type ShiftReport } from './mentor';
+import { RES } from './resourceHelp';
 import { SCI } from '../data/scienceFacts';
 import { isGadget, isScenario, type ActionId, type Gadget } from './scenarios';
 import type { GameState } from './types';
@@ -63,6 +64,8 @@ export type UIAction =
   | { type: 'hint' }
   | { type: 'expl' }
   | { type: 'sq'; k: number }
+  /** "Ask Pip about your base" or a panel's "What is this?" link: Pip explains resource `k` (index into RES). */
+  | { type: 'rq'; k: number }
   /** "See your results": leaves the finished mission for the debrief */
   | { type: 'results' }
   /** "Play again": Pip asks the player to confirm. Changes nothing else. */
@@ -90,7 +93,7 @@ export const RESTART_KEPT = 'Okay! Your mission results are still here.';
  */
 const SCREENS: Record<UIAction['type'], readonly Screen[]> = {
   'go-brief': ['launch'], 'go-event': ['brief', 'prep', 'debrief'], ev: ['event'], up: ['prep'], launch: ['prep'],
-  pick: ['mission'], cancel: ['mission'], confirm: ['mission'], resolve: ['mission'], hint: ['mission'], expl: ['mission'], sq: ['mission'],
+  pick: ['mission'], cancel: ['mission'], confirm: ['mission'], resolve: ['mission'], hint: ['mission'], expl: ['mission'], sq: ['mission'], rq: ['mission'],
   results: ['mission'], restart: ['debrief'], 'restart-no': ['debrief'], 'restart-yes': ['debrief'],
 };
 
@@ -177,7 +180,9 @@ function apply(ui: UIState, a: UIAction): UIState | null {
         // The mission screen stays up after the last shift, so its report can be read before the results.
         const rep = shiftReport(G, r.rec, r.state), news = stormNews(r.state);
         next.prev = before; next.game = r.state; next.tx = true; next.mentor = ''; next.report = rep; next.showReport = true;
-        return say(next, ui, [news?.text, reportText(rep)].filter(Boolean).join(' '));
+        // Low battery or supplies are read out too, after the report, so screen-reader users hear the same warning the panels show.
+        const low = lowWarnings(r.state);
+        return say(next, ui, [news?.text, reportText(rep), low.power, low.life].filter(Boolean).join(' '));
       }
       next.mentor = reason(r.error, G); next.showReport = false;
       return say(next, ui, next.mentor);
@@ -191,6 +196,11 @@ function apply(ui: UIState, a: UIAction): UIState | null {
     case 'sq':
       if (!Number.isInteger(a.k) || !SCI[a.k]) return null;
       return say({ ...ui, pending: null, mentor: SCI[a.k].a, showReport: false }, ui, SCI[a.k].a);
+    case 'rq': {
+      if (!G || !Number.isInteger(a.k) || !RES[a.k]) return null;
+      const text = RES[a.k].a(G);
+      return say({ ...ui, pending: null, mentor: text, showReport: false }, ui, text);
+    }
     case 'results':
       if (!G?.ended) return null;
       return { ...ui, screen: 'debrief', pending: null, mentor: '', announce: '', restartAsk: false };

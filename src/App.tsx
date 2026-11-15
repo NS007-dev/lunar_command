@@ -45,7 +45,8 @@ export default function App() {
     case 'mission': if (s) screen = <Mission s={s} pending={ui.pending} resolving={ui.resolving} mentor={ui.mentor} prev={ui.prev} tx={ui.tx}
       report={ui.report} showReport={ui.showReport} refused={ui.refused} onResults={() => dispatch({ type: 'results' })}
       onPick={k => dispatch({ type: 'pick', k })} onConfirm={confirm} onCancel={() => dispatch({ type: 'cancel' })}
-      onHint={() => dispatch({ type: 'hint' })} onExplain={() => dispatch({ type: 'expl' })} onAsk={k => dispatch({ type: 'sq', k })} />; break;
+      onHint={() => dispatch({ type: 'hint' })} onExplain={() => dispatch({ type: 'expl' })} onAsk={k => dispatch({ type: 'sq', k })}
+      onAskBase={k => dispatch({ type: 'rq', k })} />; break;
     case 'debrief': if (s) screen = <Results s={s} asking={ui.restartAsk} onRestart={() => dispatch({ type: 'restart' })}
       onRestartYes={() => dispatch({ type: 'restart-yes' })} onRestartNo={() => dispatch({ type: 'restart-no' })}
       onOtherEvent={() => dispatch({ type: 'go-event' })} />; break;

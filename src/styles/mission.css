@@ -462,3 +462,75 @@
 .stat .l {
     line-height: 1.3
 }
+
+/* ===== Resource help (issue #8) ===== */
+
+/* Why each resource matters */
+.stat span.why-l {
+    font-weight: 400;
+    margin-top: 4px
+}
+
+/* "What is this?" link on each resource panel */
+.stat .what {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 4px 0;
+    background: none;
+    border: 0;
+    color: var(--ink);
+    font: 700 .9rem var(--b);
+    text-decoration: underline;
+    cursor: pointer
+}
+
+.stat .what .q {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: #fff;
+    text-decoration: none;
+    font-size: .85rem
+}
+
+/* Written low warning (the red cells/segments are never the only clue) */
+.stat .low-w {
+    display: flex;
+    gap: 6px;
+    align-items: flex-start;
+    margin-top: 8px;
+    padding: 6px 8px;
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    background: #ffd2c7;
+    font-weight: 700;
+    font-size: .9rem
+}
+
+/* What happens every shift, whatever job is picked */
+.every {
+    margin: 18px 0 8px;
+    font-weight: 700
+}
+
+/* What a job adds or uses (besides its power cost) */
+.act .fx {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px
+}
+
+.act .fx .chip {
+    padding: 1px 8px;
+    border: 2px solid var(--ink);
+    border-radius: 999px;
+    background: #fff;
+    font-weight: 700;
+    white-space: nowrap
+}

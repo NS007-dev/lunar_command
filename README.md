@@ -32,8 +32,10 @@ The mission has a few steps:
 | --- | --- |
 | 🔋 Battery power | The electricity the Moon base needs to run. |
 | 💧 Crew supplies | A simplified mix of air, water and food for the crew. |
-| 🛡️ Crew protection | Shelter layers that represent protection from radiation in this game. |
-| ⭐ Science stars | Points earned by doing experiments. |
+| 🛡️ Storm shelter | Shelter layers that represent protection from radiation in this game. |
+| ⭐ Science stars | Something new the crew learns, won only by doing experiments. Four are needed for a full mission success. |
+
+In the game, each resource panel has a short "why it matters" line and a **What is this?** link that makes Pip explain it. Job buttons show what each job adds or uses, and low battery or supplies get a written warning. See section 10 of [`GAME_RULES.md`](GAME_RULES.md).
 
 ### What can you do on a shift?
 
@@ -86,7 +88,7 @@ The current game has three possible outcomes:
 
 - **Mission success:** the crew survives, stays protected during every storm shift, and earns at least four science stars.
 - **Survival success** (shown on screen as "Crew survived"): the mission reaches the end, but one or more success goals were missed.
-- **Critical failure** (shown on screen as "Mission stopped"): the base cannot keep going because it runs out of the resources needed to continue.
+- **Critical failure** (shown on screen as "Mission stopped"): the base cannot keep going. With the current numbers this happens when crew supplies run out (a low battery limits jobs but cannot end the mission).
 
 The results screen gives a score out of 100. It looks at crew survival, storm protection, supplies left, battery power left and science progress. The exact points are explained in [`GAME_RULES.md`](GAME_RULES.md).
 

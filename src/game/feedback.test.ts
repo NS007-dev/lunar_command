@@ -172,7 +172,10 @@ describe('storm results and failures', () => {
     expect(report.end).toMatch(/Mission complete!/);
   });
   it('the preview names each resource and says how to carry on', () => {
-    expect(previewText(start(0, ['lab', 'garden']), 'shelter')).toBe(`If you do this: battery power 5 → 4, crew supplies 6 → 5, shelter 2 layers, 0 stars. ${CONFIRM}`);
+    // Issue #8: the preview explains each change with the same lines as the report after the shift.
+    expect(previewText(start(0, ['lab', 'garden']), 'shelter')).toBe(
+      'If you do this: Battery power 5 → 4: +3 from the sun, −2 to run the base, −2 for the job. Crew supplies 6 → 5: −1 used by the crew. '
+      + `Shelter 0 → 2 layers: +2. That is enough for the storm (it needs 2)! ${CONFIRM}`);
     expect(CONFIRM).toBe('Press "Do it!" to play this shift, or "Wait, no" to pick again.');
   });
   it('a storm-shift preview says whether the shelter will be enough', () => {

@@ -125,6 +125,8 @@ The game records how many storm shifts were protected and how many were not.
 
 The mission can end early if the base cannot cover its normal power use or if crew supplies run out.
 
+With the current numbers, the power ending cannot actually happen: the battery never drops below 0, and even in the hill's shadow the sun adds 2, which exactly covers the base's 2. A low battery only limits which jobs can be chosen (Rest is always possible). So the game must **not** tell players that an empty battery ends the mission. In practice, a mission only stops early when crew supplies reach 0.
+
 At the end of shift 8, the game checks the final outcome:
 
 - **Mission success:** no unprotected storm shifts, every storm shift was protected, and the player earned at least four science stars.
@@ -160,6 +162,22 @@ During the mission, Pip can:
   - Flare or radiation storm?
   - Why a shelter?
   - Are the numbers real?
+- Answer four questions about the base ("Ask Pip about your base"). The same answers open from the **What is this?** link on each resource panel:
+  - What is battery power for?
+  - What are crew supplies?
+  - How does the shelter keep the crew safe?
+  - What do science stars mean?
+
+### How the game explains resources
+
+These explanations only describe the rules above. They never change them.
+
+- **Resource panels:** each panel has a short "why it matters" line and a **What is this?** link. Pip's answer is built from the game's own numbers (the battery size, this storm's shelter need and what each job really does with the chosen gadgets), so it is always right.
+- **Job buttons:** the corner shows the power cost. Badges show everything else the job adds or uses (for example "−1 supply" and "+2 stars"). Both come from the engine's own plan, so gadgets are always included. A line above the jobs says what happens every shift, whatever job is picked: the base uses 2 power and the crew uses 1 supply.
+- **Preview before "Do it!":** Pip lists what would change, using exactly the same lines as the report after the shift (for example "Crew supplies 6 → 8: +3 from recycling, −1 used by the crew."), including notes when extra power or supplies would not fit.
+- **Low warnings:** when battery power is 3 or less, or crew supplies are 3 or less, the panel shows a written "Low!" warning next to the red bar, and screen readers hear it after the shift report. Colour is never the only clue.
+- **Garden:** the info box says how many shifts are left and that the food gives 4 supplies.
+- **Briefing and results:** the briefing says that the mission stops if supplies run out and what science stars are. The results say that supplies and power left at the end give extra points.
 
 Pip's explanations should stay friendly and simple. If we add new science facts, we should add reliable sources for them too.
 

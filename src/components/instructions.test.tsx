@@ -113,10 +113,11 @@ describe('mission screen', () => {
     expect(text(mission(start()))).toContain('What just happened?');
   });
   it('the shelter job shows how many layers it adds (2, or 3 with the Thick Walls Kit)', () => {
+    // Issue #8 moved the layer count from the end of the description into the job's effect badges.
     const plain = renderToStaticMarkup(<ActionButton s={start()} a="shelter" pressed={false} resolving={false} onPick={noop} />);
     const walls = renderToStaticMarkup(<ActionButton s={start(0, ['walls', 'lab'])} a="shelter" pressed={false} resolving={false} onPick={noop} />);
-    expect(plain).toContain('+2 layers.');
-    expect(walls).toContain('+3 layers.');
+    expect(plain).toContain('<span class="chip">+2 layers</span>');
+    expect(walls).toContain('<span class="chip">+3 layers</span>');
   });
   it('the experiment and Ask Earth jobs say why and what for', () => {
     const t = text(mission(start()));
@@ -147,7 +148,7 @@ describe('screen readers', () => {
     if (!r.ok) throw new Error(r.error);
     const report = renderToStaticMarkup(<PipReport r={shiftReport(s, r.rec, r.state)} />);
     expect(report).toContain('Battery power 5 <span aria-hidden="true">→</span><span class="sr-only">to</span> 4');
-    expect(mission(s, 'shelter')).toContain('battery power 5 <span aria-hidden="true">→</span><span class="sr-only">to</span> 4');
+    expect(mission(s, 'shelter')).toContain('Battery power 5 <span aria-hidden="true">→</span><span class="sr-only">to</span> 4');
   });
   it('the Moon picture calls the storm a radiation storm and counts shelter layers', () => {
     const html = renderToStaticMarkup(<MoonScene s={{ ...start(), turn: SC[0].at, shield: 1 }} full />);
